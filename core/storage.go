@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"os"
+	"strings"
 
 	bolt "go.etcd.io/bbolt"
 )
@@ -130,4 +131,15 @@ func GetNode(checksum string, db *bolt.DB) (Node, error) {
 		defer db.Close()
 	}
 	return node, err
+}
+
+func VerifyNode(node Node, nextNode Node) error {
+	nodeHash, err := calculateStringHash(fmt.Sprintf("%d%d%s%s", node.BlockStart, node.BlockEnd, node.BlockSum, node.PrevNodeSum))
+	if err != nil {
+		return err
+	}
+	if strings.Compare(nodeHash, nextNode.PrevNodeSum) != 0 {
+		return fmt.Errorf("Node %s is not valid!", node.PrevNodeSum)
+	}
+	return nil
 }

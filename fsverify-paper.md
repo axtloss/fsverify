@@ -33,7 +33,7 @@ Field|Purpose
 BlockStart|The Hex offset at which the block begins
 BlockEnd|The Hex offset at which the block ends
 BlockSum|The checksum of the block
-PrevNodeSum|The checksum of all the fields of the previous field as a checksum
+PrevNodeSum|The checksum of all the fields of the previous field as a checksum and the identifier of the node
 
 Each block is 4kb big, if the partition size does not allow an even split in 4kb sectors, the partition will be split as good as possible, with a smaller block as the last sector.
 
@@ -59,6 +59,8 @@ through this, the slightest change in one of the nodes will result in a wrong ha
                        |
                  Modified value
 ```
+
+The first Node will have `PrevNodeSum` as "Entrypoint" as the PrevNodeSum field is also used to access each node, using EntryPoint allows fsverify to start the verification by always being able to read the first node
 
 
 # Verification Process
