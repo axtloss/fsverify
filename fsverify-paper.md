@@ -2,14 +2,15 @@
 The FsVerify partition contains a header with the necessary metadata for the filesystem verification, and a bbolt database containing all File and Directory nodes to be checked.
 
 ## Partition Header
-`<magic number> <signature> <filesystem size> <table size>`
+`<magic number> <signature> <filesystem size> <table size> <table unit>`
 
 Field|Size|Purpose|Value
 -----|----|-------|-----
 magic number|2 bytes|sanity check|0xACAB
 signature|302 bytes|minisign signature|
 filesystem size|4 bytes|size of the original filesystem in gb
-table size|4 bytes| size of the table in mb
+table size|4 bytes| size of the table in \<table unit\>
+table unit|1 byte|unit of the table size|0x0: bytes, 0x1: kilobytes, 0x2: megabytes, 0x3: gigabytes, 0x4: terabytes, 0x5: petabytes
 
 Due to the filesystem and table size field, which can go up to 0xFFFFFFFF (16777215), the maximum supported partition size and table size is 16777215gb (~16pb)
 
