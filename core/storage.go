@@ -5,6 +5,7 @@ import (
 	"encoding/binary"
 	"encoding/json"
 	"fmt"
+	"io"
 	"os"
 	"strings"
 
@@ -114,11 +115,9 @@ func ReadDB(partition string) (string, error) {
 		fmt.Println(err)
 		return "", err
 	}
-	fmt.Println("Header:")
-	fmt.Println(header.TableSize)
-	fmt.Println(header.TableUnit)
+
 	db := make([]byte, header.TableSize*header.TableUnit)
-	_, err = reader.Read(db)
+	_, err = io.ReadFull(reader, db)
 	if err != nil {
 		return "", err
 	}
@@ -128,16 +127,12 @@ func ReadDB(partition string) (string, error) {
 		return "", err
 	}
 
-	fmt.Println("DB Path:")
-	fmt.Println(temp)
-	fmt.Println()
-	err = os.WriteFile(temp+"/verify.db", db, 0777)
+	err = os.WriteFile(temp+"/verify.db", db, 0700)
 	if err != nil {
 		return "", err
 	}
 
-	//defer os.RemoveAll(temp)
-	return temp + "/verify.db", err
+	return temp + "/verify.db", nil
 }
 
 func OpenDB(dbpath string) (*bolt.DB, error) {
