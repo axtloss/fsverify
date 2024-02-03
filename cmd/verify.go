@@ -21,10 +21,23 @@ func NewVerifyCommand() *cobra.Command {
 
 func ValidateCommand(_ *cobra.Command, args []string) error {
 
+	/*	node := core.Node{
+			BlockStart:  0,
+			BlockEnd:    4000,
+			BlockSum:    "ba0064e29f79feddc3b7912c697a80c93ada98a916b19573ff41598c17177b92",
+			PrevNodeSum: "Entrypoint",
+		}
+
+		err := core.AddNode(node, nil)
+		if err != nil {
+			return err
+		}*/
+
 	header, err := core.ReadHeader("/dev/sda")
 	fmt.Printf("Magic Number: %d\n", header.MagicNumber)
-	fmt.Printf("Signature: %s\n" + header.Signature)
+	fmt.Printf("Signature: %s", header.Signature)
 	fmt.Printf("FsSize: %d\n", header.FilesystemSize)
+	fmt.Printf("FsUnit: %d\n", header.FilesystemUnit)
 	fmt.Printf("Table Size: %d\n", header.TableSize)
 	fmt.Printf("Table Size Unit: %d\n", header.TableUnit)
 	if err != nil {
@@ -40,7 +53,7 @@ func ValidateCommand(_ *cobra.Command, args []string) error {
 		return err
 	}
 
-	getnode, err := core.GetNode("aaaa", db)
+	getnode, err := core.GetNode("Entrypoint", db)
 	if err != nil {
 		return err
 	}
@@ -56,5 +69,15 @@ func ValidateCommand(_ *cobra.Command, args []string) error {
 	}
 	hash, err := core.CalculateBlockHash(part)
 	fmt.Println(hash)
-	return err
+	if err != nil {
+		return err
+	}
+
+	err = core.VerifyBlock(part, getnode)
+	if err != nil {
+		fmt.Println("fail")
+		return err
+	}
+	fmt.Printf("Block '%s' ranging from %d to %d matches!\n", getnode.PrevNodeSum, getnode.BlockStart, getnode.BlockEnd)
+	return nil
 }

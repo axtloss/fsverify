@@ -15,6 +15,7 @@ type Header struct {
 	MagicNumber    int
 	Signature      string
 	FilesystemSize int
+	FilesystemUnit int
 	TableSize      int
 	TableUnit      int
 }
@@ -24,6 +25,25 @@ type Node struct {
 	BlockEnd    int
 	BlockSum    string
 	PrevNodeSum string
+}
+
+func parseUnitSpec(size []byte) int {
+	switch size[0] {
+	case 0:
+		return 1
+	case 1:
+		return 1000
+	case 2:
+		return 1000000
+	case 3:
+		return 1000000000
+	case 4:
+		return 1000000000000
+	case 5:
+		return 1000000000000000
+	default:
+		return -1
+	}
 }
 
 func ReadHeader(partition string) (Header, error) {
@@ -42,7 +62,8 @@ func ReadHeader(partition string) (Header, error) {
 	MagicNumber := make([]byte, 2)
 	UntrustedHash := make([]byte, 100)
 	TrustedHash := make([]byte, 88)
-	FileSystemSize := make([]byte, 4)
+	FilesystemSize := make([]byte, 4)
+	FilesystemUnit := make([]byte, 1)
 	TableSize := make([]byte, 4)
 	TableUnit := make([]byte, 1)
 
@@ -61,7 +82,11 @@ func ReadHeader(partition string) (Header, error) {
 	if err != nil {
 		return Header{}, err
 	}
-	_, err = reader.Read(FileSystemSize)
+	_, err = reader.Read(FilesystemSize)
+	if err != nil {
+		return Header{}, err
+	}
+	_, err = reader.Read(FilesystemUnit)
 	if err != nil {
 		return Header{}, err
 	}
@@ -75,23 +100,12 @@ func ReadHeader(partition string) (Header, error) {
 	}
 
 	header.Signature = fmt.Sprintf("untrusted comment: signature from minisign secret key\r\n%s\r\ntrusted comment: timestamp:0\tfile:fsverify\thashed\r\n%s\r\n", UntrustedHash, TrustedHash)
-	header.FilesystemSize = int(binary.BigEndian.Uint16(FileSystemSize))
+	header.FilesystemSize = int(binary.BigEndian.Uint16(FilesystemSize))
 	header.TableSize = int(binary.BigEndian.Uint32(TableSize))
-	switch TableUnit[0] {
-	case 0:
-		header.TableUnit = 1
-	case 1:
-		header.TableUnit = 1000
-	case 2:
-		header.TableUnit = 1000000
-	case 3:
-		header.TableUnit = 1000000000
-	case 4:
-		header.TableUnit = 1000000000000
-	case 5:
-		header.TableUnit = 1000000000000000
-	default:
-		return Header{}, fmt.Errorf("Unknown TableUnit %d", TableUnit)
+	header.FilesystemUnit = parseUnitSpec(FilesystemUnit)
+	header.TableUnit = parseUnitSpec(TableUnit)
+	if header.FilesystemUnit == -1 || header.TableUnit == -1 {
+		return Header{}, fmt.Errorf("Error: unit size for Filesystem or Table invalid: fs: %x, table: %x", FilesystemUnit, TableUnit)
 	}
 	return header, nil
 }
@@ -108,7 +122,7 @@ func ReadDB(partition string) (string, error) {
 	defer part.Close()
 	reader := bufio.NewReader(part)
 
-	_, err = reader.Read(make([]byte, 199))
+	_, err = reader.Read(make([]byte, 200))
 	if err != nil {
 		fmt.Println(err)
 		return "", err

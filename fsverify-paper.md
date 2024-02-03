@@ -2,20 +2,21 @@
 The FsVerify partition contains a header with the necessary metadata for the filesystem verification, and a bbolt database containing all File and Directory nodes to be checked.
 
 ## Partition Header
-`<magic number> <untrusted signature hash> <trusted signature hash> <filesystem size> <table size> <table unit>`
+`<magic number> <untrusted signature hash> <trusted signature hash> <filesystem size> <filesystem unit> <table size> <table unit>`
 
 Field|Size|Purpose|Value
 -----|----|-------|-----
 magic number|2 bytes|sanity check|0xACAB
 untrusted signature hash|100 bytes|untrusted signature from minisign
 trusted signature hash|88 bytes|trusted signature from minisign
-filesystem size|4 bytes|size of the original filesystem in gb
+filesystem size|4 bytes|size of the original filesystem in <table unit\>
+filesystem unit|1 byte|unit of the filesystem size|0x0: bytes, 0x1: kilobytes, 0x2: megabytes, 0x3: gigabytes, 0x4: terabytes, 0x5: petabytes
 table size|4 bytes| size of the table in <table unit\>
 table unit|1 byte|unit of the table size|0x0: bytes, 0x1: kilobytes, 0x2: megabytes, 0x3: gigabytes, 0x4: terabytes, 0x5: petabytes
 
-Due to the filesystem and table size field, which can go up to 0xFFFFFFFF (16777215), the maximum supported partition size and table size is 16777215gb (~16pb)
+Due to the filesystem and table size field, which can go up to 0xFFFFFFFF (16777215), the maximum supported partition size and table size is 16777215pb
 
-The entire Head should be a total of 199 bytes long, reaching from 0x0 to 0xC7
+The entire Head should be a total of 200 bytes long, reaching from 0x0 to 0xC8
 
 ## Partition Contents / Database
 The main database containing the checksums is a [bbolt](https://github.com/etcd-io/bbolt) datbase consisting of a single bucket called `Nodes`
@@ -62,7 +63,7 @@ through this, the slightest change in one of the nodes will result in a wrong ha
                  Modified value
 ```
 
-The first Node will have `PrevNodeSum` as "Entrypoint" as the PrevNodeSum field is also used to access each node, using EntryPoint allows fsverify to start the verification by always being able to read the first node
+The first Node will have `PrevNodeSum` as "Entrypoint" since the PrevNodeSum field is also used to access each node, using EntryPoint allows fsverify to start the verification by always being able to read the first node
 
 
 # Verification Process
