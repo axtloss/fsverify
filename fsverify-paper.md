@@ -75,7 +75,7 @@ The verification step consists of multiple steps:
 4. Verifying the target partition using the database
 
 ## Reading the Signature and Public Key
-Reading the signature is quite simple, it is part of the Fsverify partition header and is read at an offset starting at 0x4 up to 0x132 (total 302 Bytes).
+The header only contains parts of the signature, the Trusted Hash and the Untrusted Hash, using this a complete signature is constructed, this allows for easier storage of the signature as the full signature contains data that can change over time (but is not required for signing) and break the header by becoming too big.
 
 The Public Key however is not stored in the partition, instead it can be stored in multiple ways
 - A different partition that has been verified in a different way
@@ -88,7 +88,7 @@ The most secure option for most average Desktop computers would be the TPM2 or a
 In the case that the hardware itself cannot be trusted, read-only external storage can be used to store the key, this can ensure that the public key is never modified, assuming the person carrying said storage device does not loose it.
 
 ## Reading the database
-The Database is simply read from 0x13A until the size of the table is reached as specified in the headers. If the table would be 1mb big, it would reach from 0x13A until 0xF437A (1000000bytes/1mb)
+The Database is simply read from 0x13A until the size of the table is reached as specified in the headers. If the table is 1mb big, it would reach from 0xC8 until 0xF4308 (1000000bytes/1mb)
 
 ## Verifying the database using the previously read keys
 Now that the signature, public key and database are read, they can be verified using [minisign](https://jedisct1.github.io/minisign/).
