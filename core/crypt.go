@@ -1,25 +1,25 @@
 package core
 
 import (
+	"bytes"
 	"crypto/sha256"
 	"fmt"
 	"io"
-	"os"
 	"strings"
 )
 
 func calculateStringHash(a string) (string, error) {
 	hash := sha256.New()
 	hash.Write([]byte(a))
-	hashInBytes := hash.Sum(nil)[:20]
+	hashInBytes := hash.Sum(nil)[:32]
 	return strings.TrimSpace(fmt.Sprintf("%x", hashInBytes)), nil
 }
 
-func calculateFileHash(file *os.File) (string, error) {
+func CalculateBlockHash(block []byte) (string, error) {
 	hash := sha256.New()
-	if _, err := io.Copy(hash, file); err != nil {
+	if _, err := io.Copy(hash, bytes.NewReader(block)); err != nil {
 		return "", err
 	}
-	hashInBytes := hash.Sum(nil)[:20]
+	hashInBytes := hash.Sum(nil)[:32]
 	return strings.TrimSpace(fmt.Sprintf("%x", hashInBytes)), nil
 }

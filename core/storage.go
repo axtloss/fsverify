@@ -7,7 +7,6 @@ import (
 	"fmt"
 	"io"
 	"os"
-	"strings"
 
 	bolt "go.etcd.io/bbolt"
 )
@@ -41,7 +40,8 @@ func ReadHeader(partition string) (Header, error) {
 	header := Header{}
 	reader := bufio.NewReader(part)
 	MagicNumber := make([]byte, 2)
-	Signature := make([]byte, 302)
+	UntrustedHash := make([]byte, 100)
+	TrustedHash := make([]byte, 88)
 	FileSystemSize := make([]byte, 4)
 	TableSize := make([]byte, 4)
 	TableUnit := make([]byte, 1)
@@ -53,7 +53,11 @@ func ReadHeader(partition string) (Header, error) {
 	}
 	header.MagicNumber = int(MagicNum)
 
-	_, err = reader.Read(Signature)
+	_, err = reader.Read(UntrustedHash)
+	if err != nil {
+		return Header{}, err
+	}
+	_, err = reader.Read(TrustedHash)
 	if err != nil {
 		return Header{}, err
 	}
@@ -70,7 +74,7 @@ func ReadHeader(partition string) (Header, error) {
 		return Header{}, err
 	}
 
-	header.Signature = string(Signature)
+	header.Signature = fmt.Sprintf("untrusted comment: signature from minisign secret key\r\n%s\r\ntrusted comment: timestamp:0\tfile:fsverify\thashed\r\n%s\r\n", UntrustedHash, TrustedHash)
 	header.FilesystemSize = int(binary.BigEndian.Uint16(FileSystemSize))
 	header.TableSize = int(binary.BigEndian.Uint32(TableSize))
 	switch TableUnit[0] {
@@ -104,7 +108,7 @@ func ReadDB(partition string) (string, error) {
 	defer part.Close()
 	reader := bufio.NewReader(part)
 
-	_, err = reader.Read(make([]byte, 313))
+	_, err = reader.Read(make([]byte, 199))
 	if err != nil {
 		fmt.Println(err)
 		return "", err
@@ -135,12 +139,12 @@ func ReadDB(partition string) (string, error) {
 	return temp + "/verify.db", nil
 }
 
-func OpenDB(dbpath string) (*bolt.DB, error) {
+func OpenDB(dbpath string, readonly bool) (*bolt.DB, error) {
 	_, exist := os.Stat(dbpath)
 	if os.IsNotExist(exist) {
 		os.Create(dbpath)
 	}
-	db, err := bolt.Open(dbpath, 0777, nil)
+	db, err := bolt.Open(dbpath, 0777, &bolt.Options{ReadOnly: readonly})
 	if err != nil {
 		return nil, err
 	}
@@ -151,11 +155,13 @@ func AddNode(node Node, db *bolt.DB) error {
 	var err error
 	var deferDB bool
 	if db == nil {
-		db, err = OpenDB("my.db")
+		db, err = OpenDB("my.db", false)
 		if err != nil {
 			return err
 		}
 		deferDB = true
+	} else if db.IsReadOnly() {
+		return fmt.Errorf("Error: database is opened read only, unable to add nodes")
 	}
 	err = db.Update(func(tx *bolt.Tx) error {
 		nodes, err := tx.CreateBucketIfNotExists([]byte("Nodes"))
@@ -180,7 +186,7 @@ func GetNode(checksum string, db *bolt.DB) (Node, error) {
 	var err error
 	var deferDB bool
 	if db == nil {
-		db, err = OpenDB("my.db")
+		db, err = OpenDB("my.db", true)
 		if err != nil {
 			return Node{}, err
 		}
@@ -197,15 +203,4 @@ func GetNode(checksum string, db *bolt.DB) (Node, error) {
 		defer db.Close()
 	}
 	return node, err
-}
-
-func VerifyNode(node Node, nextNode Node) error {
-	nodeHash, err := calculateStringHash(fmt.Sprintf("%d%d%s%s", node.BlockStart, node.BlockEnd, node.BlockSum, node.PrevNodeSum))
-	if err != nil {
-		return err
-	}
-	if strings.Compare(nodeHash, nextNode.PrevNodeSum) != 0 {
-		return fmt.Errorf("Node %s is not valid!", node.PrevNodeSum)
-	}
-	return nil
 }
