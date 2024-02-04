@@ -11,6 +11,8 @@ import (
 	"github.com/tarm/serial"
 )
 
+var TotalReadBlocks int = 0
+
 func fileReadKey() (string, error) {
 	if _, err := os.Stat(config.KeyLocation); os.IsNotExist(err) {
 		return "", fmt.Errorf("Key location %s does not exist", config.KeyLocation)
@@ -98,6 +100,7 @@ func ReadBlock(node Node, part *bufio.Reader) ([]byte, error) {
 		return []byte{}, err
 	}
 	block, err = part.Peek(blockSize)
+	TotalReadBlocks = TotalReadBlocks + blockSize
 	return block, err
 }
 

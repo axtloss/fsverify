@@ -27,6 +27,10 @@ type Node struct {
 	PrevNodeSum string
 }
 
+func (n *Node) GetHash() (string, error) {
+	return calculateStringHash(fmt.Sprintf("%d%d%s%s", n.BlockStart, n.BlockEnd, n.BlockSum, n.PrevNodeSum))
+}
+
 func parseUnitSpec(size []byte) int {
 	switch size[0] {
 	case 0:

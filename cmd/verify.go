@@ -21,17 +21,33 @@ func NewVerifyCommand() *cobra.Command {
 
 func ValidateCommand(_ *cobra.Command, args []string) error {
 
-	/*	node := core.Node{
-			BlockStart:  0,
-			BlockEnd:    4000,
-			BlockSum:    "ba0064e29f79feddc3b7912c697a80c93ada98a916b19573ff41598c17177b92",
-			PrevNodeSum: "Entrypoint",
-		}
+	/*entrynode := core.Node{
+		BlockStart:  0,
+		BlockEnd:    4000,
+		BlockSum:    "32fd1c42b66cbf1b2f0f1a65a3cb08f3d7845eac7f43e13b2b5b5f9f837e3346",
+		PrevNodeSum: "Entrypoint",
+	}
 
-		err := core.AddNode(node, nil)
-		if err != nil {
-			return err
-		}*/
+	err := core.AddNode(entrynode, nil)
+	if err != nil {
+		return err
+	}
+
+	entryHash, err := entrynode.GetHash()
+	if err != nil {
+		return err
+	}
+	nextNode := core.Node{
+		BlockStart:  4000,
+		BlockEnd:    8000,
+		BlockSum:    "3d73ff8cb154dcfe8cdae426021f679e541b47dbe14e8426e6b1cd3f2c57017c",
+		PrevNodeSum: entryHash,
+	}
+
+	err = core.AddNode(nextNode, nil)
+	if err != nil {
+		return err
+	}*/
 
 	header, err := core.ReadHeader("/dev/sda")
 	fmt.Printf("Magic Number: %d\n", header.MagicNumber)
@@ -61,9 +77,29 @@ func ValidateCommand(_ *cobra.Command, args []string) error {
 
 	fmt.Println("----")
 
+	key, err := core.ReadKey()
+	if err != nil {
+		return err
+	}
+	fmt.Println("Key: " + key)
+
+	err = core.VerifySignature(key, header.Signature, dbfile)
+	if err != nil {
+		return err
+	} else {
+		fmt.Println("Signtaure success")
+	}
+
+	fmt.Println("----")
+
 	disk, err := os.Open("./partition.raw")
 	reader := bufio.NewReader(disk)
 	part, err := core.ReadBlock(getnode, reader)
+	if err != nil {
+		return err
+	}
+	diskInfo, err := disk.Stat()
+	node, err := core.GetNode("Entrypoint", db)
 	if err != nil {
 		return err
 	}
@@ -80,19 +116,35 @@ func ValidateCommand(_ *cobra.Command, args []string) error {
 	}
 	fmt.Printf("Block '%s' ranging from %d to %d matches!\n", getnode.PrevNodeSum, getnode.BlockStart, getnode.BlockEnd)
 
-	fmt.Println("----")
+	fmt.Println(node)
+	for int64(core.TotalReadBlocks) < diskInfo.Size() {
+		nodeSum, err := node.GetHash()
+		if err != nil {
+			return err
+		}
+		node, err := core.GetNode(nodeSum, db)
+		if err != nil {
+			return err
+		}
+		fmt.Println("----")
+		fmt.Println(node)
+		part, err := core.ReadBlock(node, reader)
+		if err != nil {
+			return err
+		}
+		hash, err := core.CalculateBlockHash(part)
+		fmt.Println(hash)
+		if err != nil {
+			return err
+		}
+		err = core.VerifyBlock(part, node)
+		if err != nil {
+			fmt.Println("fail")
+			return err
+		}
+		fmt.Printf("Block '%s' ranging from %d to %d matches!\n", getnode.PrevNodeSum, getnode.BlockStart, getnode.BlockEnd)
 
-	key, err := core.ReadKey()
-	if err != nil {
-		return err
 	}
-	fmt.Println("Key: " + key)
 
-	err = core.VerifySignature(key, header.Signature, dbfile)
-	if err != nil {
-		return err
-	} else {
-		fmt.Println("Signtaure success")
-	}
 	return nil
 }
