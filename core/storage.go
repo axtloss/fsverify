@@ -99,7 +99,7 @@ func ReadHeader(partition string) (Header, error) {
 		return Header{}, err
 	}
 
-	header.Signature = fmt.Sprintf("untrusted comment: signature from minisign secret key\r\n%s\r\ntrusted comment: timestamp:0\tfile:fsverify\thashed\r\n%s\r\n", UntrustedHash, TrustedHash)
+	header.Signature = fmt.Sprintf("untrusted comment: fsverify\r\n%s\r\ntrusted comment: fsverify\r\n%s\r\n", UntrustedHash, TrustedHash)
 	header.FilesystemSize = int(binary.BigEndian.Uint16(FilesystemSize))
 	header.TableSize = int(binary.BigEndian.Uint32(TableSize))
 	header.FilesystemUnit = parseUnitSpec(FilesystemUnit)
@@ -135,10 +135,14 @@ func ReadDB(partition string) (string, error) {
 	}
 
 	db := make([]byte, header.TableSize*header.TableUnit)
-	_, err = io.ReadFull(reader, db)
+	n, err := io.ReadFull(reader, db)
 	if err != nil {
 		return "", err
 	}
+	if n != header.TableSize*header.TableUnit {
+		return "", fmt.Errorf("Error: Database is not expected size. Got: %d, expected %d", n, header.TableSize*header.TableUnit)
+	}
+	fmt.Printf("db: %d\n", n)
 
 	temp, err := os.MkdirTemp("", "*-fsverify")
 	if err != nil {

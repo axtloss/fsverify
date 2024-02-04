@@ -79,5 +79,20 @@ func ValidateCommand(_ *cobra.Command, args []string) error {
 		return err
 	}
 	fmt.Printf("Block '%s' ranging from %d to %d matches!\n", getnode.PrevNodeSum, getnode.BlockStart, getnode.BlockEnd)
+
+	fmt.Println("----")
+
+	key, err := core.ReadKey()
+	if err != nil {
+		return err
+	}
+	fmt.Println("Key: " + key)
+
+	err = core.VerifySignature(key, header.Signature, dbfile)
+	if err != nil {
+		return err
+	} else {
+		fmt.Println("Signtaure success")
+	}
 	return nil
 }
