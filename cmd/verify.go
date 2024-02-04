@@ -142,7 +142,7 @@ func ValidateCommand(_ *cobra.Command, args []string) error {
 			fmt.Println("fail")
 			return err
 		}
-		fmt.Printf("Block '%s' ranging from %d to %d matches!\n", getnode.PrevNodeSum, getnode.BlockStart, getnode.BlockEnd)
+		fmt.Printf("Block '%s' ranging from %d to %d matches!\n", node.PrevNodeSum, node.BlockStart, node.BlockEnd)
 
 	}
 
