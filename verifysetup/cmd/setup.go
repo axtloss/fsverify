@@ -73,5 +73,14 @@ func SetupCommand(_ *cobra.Command, args []string) error {
 	}
 	fmt.Println(finalNode)
 	err = core.AddNode(finalNode, nil, "./fsverify.db")
-	return err
+	if err != nil {
+		return err
+	}
+
+	signature, err := core.SignDatabase("./fsverify.db", "./minisign/")
+	if err != nil {
+		return err
+	}
+	fmt.Println(string(signature))
+	return nil
 }

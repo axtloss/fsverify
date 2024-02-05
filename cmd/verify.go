@@ -82,12 +82,13 @@ func ValidateCommand(_ *cobra.Command, args []string) error {
 		return err
 	}
 	fmt.Println("Key: " + key)
-
-	err = core.VerifySignature(key, header.Signature, dbfile)
+	verified, err := core.VerifySignature(key, header.Signature, dbfile)
 	if err != nil {
 		return err
+	} else if !verified {
+		return fmt.Errorf("Signature verification failed\n")
 	} else {
-		fmt.Println("Signtaure success")
+		fmt.Println("Signature verification success!")
 	}
 
 	fmt.Println("----")

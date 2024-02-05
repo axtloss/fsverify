@@ -6,8 +6,8 @@ import (
 	"os"
 	"strings"
 
+	"aead.dev/minisign"
 	"github.com/axtloss/fsverify/config"
-	"github.com/jedisct1/go-minisign"
 	"github.com/tarm/serial"
 )
 
@@ -104,28 +104,18 @@ func ReadBlock(node Node, part *bufio.Reader) ([]byte, error) {
 	return block, err
 }
 
-func VerifySignature(key string, signature string, database string) error {
-	pk, err := minisign.NewPublicKey(key)
-	if err != nil {
-		return err
-	}
-
-	sig, err := minisign.DecodeSignature(signature)
-	if err != nil {
-		return err
+func VerifySignature(key string, signature string, database string) (bool, error) {
+	var pk minisign.PublicKey
+	if err := pk.UnmarshalText([]byte(key)); err != nil {
+		return false, err
 	}
 
 	data, err := os.ReadFile(database)
 	if err != nil {
-		return err
+		return false, err
 	}
 
-	verified, err := pk.Verify(data, sig)
-	if err != nil || !verified {
-		return err
-	}
-
-	return nil
+	return minisign.Verify(pk, data, []byte(signature)), nil
 }
 
 func VerifyBlock(block []byte, node Node) error {
