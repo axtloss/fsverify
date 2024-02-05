@@ -173,37 +173,6 @@ func OpenDB(dbpath string, readonly bool) (*bolt.DB, error) {
 	return db, nil
 }
 
-func AddNode(node Node, db *bolt.DB) error {
-	var err error
-	var deferDB bool
-	if db == nil {
-		db, err = OpenDB("my.db", false)
-		if err != nil {
-			return err
-		}
-		deferDB = true
-	} else if db.IsReadOnly() {
-		return fmt.Errorf("Error: database is opened read only, unable to add nodes")
-	}
-	err = db.Update(func(tx *bolt.Tx) error {
-		nodes, err := tx.CreateBucketIfNotExists([]byte("Nodes"))
-		if err != nil {
-			return err
-		}
-		if buf, err := json.Marshal(node); err != nil {
-			return err
-		} else if err := nodes.Put([]byte(node.PrevNodeSum), buf); err != nil {
-			return err
-		}
-		return nil
-
-	})
-	if deferDB {
-		defer db.Close()
-	}
-	return err
-}
-
 func GetNode(checksum string, db *bolt.DB) (Node, error) {
 	var err error
 	var deferDB bool

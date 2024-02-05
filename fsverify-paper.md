@@ -65,7 +65,6 @@ through this, the slightest change in one of the nodes will result in a wrong ha
 
 The first Node will have `PrevNodeSum` as "Entrypoint" since the PrevNodeSum field is also used to access each node, using EntryPoint allows fsverify to start the verification by always being able to read the first node
 
-
 # Verification Process
 The verification step consists of multiple steps:
 
@@ -73,6 +72,63 @@ The verification step consists of multiple steps:
 2. Reading the database
 3. Verifying the database using the previously read keys
 4. Verifying the target partition using the database
+
+# Storing the Public key
+The public key can be stored in multiple ways:
+- Partition which has the key directly flashed onto it
+- A text file
+- TPM2
+- A device that prints the key over usb serial
+
+Fsverify does not verify the integrity or trustworthiness of these storage forms, so the integrity will have to be verified manually.
+
+## Partition which has the key directly flashed onto it
+This is quite simple, all thats required is to write the key directly into a block device:
+Assuming that sda1 is the block device which should be used, it can be as simple as:
+````bash
+echo -n "public key" > /dev/sda1
+````
+It is important to make sure that only the public key is written, no extra newlines (hence the `-n`) or whitespace surrounding the key.
+
+Once this is done, `config/config.go` can be modified to set the `KeyStore` value to `1` and `KeyLocation` to `/dev/sda1`
+
+Any form of accessing the block device directly is viable, but it is recommended to specify the uuid of the device instead of using a label or name, as that would always verify that the right block device is used and makes spoofing the device harder.
+
+## Text file
+The simplest form, and only recommended to be used in a secureboot verified UKI or a device/partition that can always be trusted (i.e. it is always read-only)
+
+All that is required is to write the public key into a text file:
+```bash
+echo -n "public key" > /path/to/publickey
+```
+It is important to make sure that only the public key is written, no extra newlines (hence the `-n`) or whitespace surrounding the key.
+
+Once this is done, `config/config.go` can be modified to set the `KeyStore` value to `0` and `KeyLocation` to `/path/to/publickey`
+
+## TPM2
+to be done
+
+## Device that prints the key over usb serial
+This is the safest form of storing the key, if done properly.
+
+Any device, like a microcontroller, that has the option to write into a serial tty (`/dev/ttyACM*`) with the baud rate `9600` can be used for this.
+It is recommended to make sure that the microcontroller cannot be reflashed once the key is written successfully, to ensure that the device does not get overwritten with the key of an attacker. 
+
+An (unsafe) example using an arduino can look like this:
+```C
+// fsverify-serial.ino
+
+void setup() {
+    Serial.setup(9600) // set up a serial tty with the baud rate 9600
+    Serial.print("\tpublic key\t") // Write the public key to the tty
+}
+
+void loop() {}
+```
+
+This will print the public key once the arduino is connected to the device, make sure that the public key is always surrounded by a `\t`, as the tab sequence is used by fsverify to figure out where a key starts and where it ends.
+
+To ensure the safety of using this method, in addition to having the microcontroller be read only, it also has to be made sure that the microcontroller is embedded in the device in a way where it cannot be easily replaced since using an external arduino makes no checks to see if the ttyACM device being accessed is actually the legitimate device.
 
 ## Reading the Signature and Public Key
 The header only contains parts of the signature, the Trusted Hash and the Untrusted Hash, using this a complete signature is constructed, this allows for easier storage of the signature as the full signature contains data that can change over time (but is not required for signing) and break the header by becoming too big.
