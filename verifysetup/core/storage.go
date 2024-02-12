@@ -11,6 +11,11 @@ import (
 var TotalReadBlocks = 0
 
 func ReadBlock(start int, end int, device *bytes.Reader) ([]byte, error) {
+	if end-start < 0 {
+		return []byte{}, fmt.Errorf("ERROR: tried creating byte slice with negative length. %d to %d total %d\n", start, end, end-start)
+	} else if end-start > 2000 {
+		return []byte{}, fmt.Errorf("ERROR: tried creating byte slice with length over 2000. %d to %d total %d\n", start, end, end-start)
+	}
 	block := make([]byte, end-start)
 	_, err := device.Seek(int64(start), 0)
 	if err != nil {
@@ -21,7 +26,7 @@ func ReadBlock(start int, end int, device *bytes.Reader) ([]byte, error) {
 	return block, err
 }
 
-func CreateNode(blockStart int, blockEnd int, block []byte, prevNode *verify.Node) (verify.Node, error) {
+func CreateNode(blockStart int, blockEnd int, block []byte, prevNode *verify.Node, n string) (verify.Node, error) {
 	node := verify.Node{}
 	node.BlockStart = blockStart
 	node.BlockEnd = blockEnd
@@ -37,39 +42,24 @@ func CreateNode(blockStart int, blockEnd int, block []byte, prevNode *verify.Nod
 			return verify.Node{}, err
 		}
 	} else {
-		prevNodeHash = "Entrypoint"
+		prevNodeHash = "Entrypoint" + n
 	}
 	node.PrevNodeSum = prevNodeHash
 	return node, nil
 }
 
-func AddNode(node verify.Node, db *bolt.DB, dbPath string) error {
-	var err error
-	var deferDB bool
-	if db == nil {
-		db, err = bolt.Open(dbPath, 0777, nil)
-		if err != nil {
-			return err
-		}
-		deferDB = true
-	} else if db.IsReadOnly() {
-		return fmt.Errorf("Error: database is opened read only, unable to add nodes")
-	}
-	err = db.Update(func(tx *bolt.Tx) error {
-		nodes, err := tx.CreateBucketIfNotExists([]byte("Nodes"))
-		if err != nil {
-			return err
-		}
-		if buf, err := json.Marshal(node); err != nil {
-			return err
-		} else if err := nodes.Put([]byte(node.PrevNodeSum), buf); err != nil {
-			return err
-		}
+func AddNode(node verify.Node, tx *bolt.Tx) error {
+	if node.BlockStart == node.BlockEnd {
 		return nil
-
-	})
-	if deferDB {
-		defer db.Close()
 	}
-	return err
+	nodes, err := tx.CreateBucketIfNotExists([]byte("Nodes"))
+	if err != nil {
+		return err
+	}
+	if buf, err := json.Marshal(node); err != nil {
+		return err
+	} else if err := nodes.Put([]byte(node.PrevNodeSum), buf); err != nil {
+		return err
+	}
+	return nil
 }
