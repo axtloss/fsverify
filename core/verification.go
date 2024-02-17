@@ -2,6 +2,7 @@ package core
 
 import (
 	"bufio"
+	"bytes"
 	"fmt"
 	"os"
 	"strings"
@@ -11,7 +12,7 @@ import (
 	"github.com/tarm/serial"
 )
 
-var TotalReadBlocks int = 0
+//var TotalReadBlocks int = 0
 
 func fileReadKey() (string, error) {
 	if _, err := os.Stat(config.KeyLocation); os.IsNotExist(err) {
@@ -92,16 +93,20 @@ func ReadKey() (string, error) {
 	return "", nil
 }
 
-func ReadBlock(node Node, part *bufio.Reader) ([]byte, error) {
+func ReadBlock(node Node, part *bytes.Reader, totalReadBlocks int) ([]byte, int, error) {
 	block := make([]byte, node.BlockEnd-node.BlockStart)
 	blockSize := node.BlockEnd - node.BlockStart
-	_, err := part.Discard(node.BlockStart)
+	_, err := part.Seek(int64(node.BlockStart), 0)
 	if err != nil {
-		return []byte{}, err
+		return []byte{}, -1, err
 	}
-	block, err = part.Peek(blockSize)
-	TotalReadBlocks = TotalReadBlocks + blockSize
-	return block, err
+	n, err := part.Read(block)
+	if err != nil {
+		return block, -1, err
+	} else if n != blockSize {
+		return block, -1, fmt.Errorf("Did not read correct amount of bytes. Expected: %d, Got: %d", blockSize, n)
+	}
+	return block, totalReadBlocks + 1, err
 }
 
 func VerifySignature(key string, signature string, database string) (bool, error) {
@@ -127,7 +132,7 @@ func VerifyBlock(block []byte, node Node) error {
 	if strings.Compare(calculatedBlockHash, strings.TrimSpace(wantedBlockHash)) == 0 {
 		return nil
 	}
-	return fmt.Errorf("Error: Node %s ranging from %d to %d does not match block", node.PrevNodeSum, node.BlockStart, node.BlockEnd)
+	return fmt.Errorf("Error: Node %s ranging from %d to %d does not match block. Expected %s, got %s.", node.PrevNodeSum, node.BlockStart, node.BlockEnd, wantedBlockHash, calculatedBlockHash)
 }
 
 func VerifyNode(node Node, nextNode Node) error {

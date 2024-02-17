@@ -58,17 +58,6 @@ func checksumBlock(blockStart int, blockEnd int, bundleSize int, diskBytes []byt
 	fmt.Printf("Node from %d to %d finished.\n", blockStart, blockEnd)
 }
 
-func copyByteArea(start int, end int, reader *bytes.Reader) ([]byte, error) {
-	bytes := make([]byte, end-start)
-	n, err := reader.ReadAt(bytes, int64(start))
-	if err != nil {
-		return nil, err
-	} else if n != end-start {
-		return nil, fmt.Errorf("Unable to read requested size. Got %d, expected %d", n, end-start)
-	}
-	return bytes, nil
-}
-
 func SetupCommand(_ *cobra.Command, args []string) error {
 	if len(args) != 2 {
 		return fmt.Errorf("Usage: verifysetup setup [partition] [procCount]")
@@ -104,7 +93,7 @@ func SetupCommand(_ *cobra.Command, args []string) error {
 	var waitGroup sync.WaitGroup
 	nodeChannels := make([]chan verify.Node, procCount+1)
 	for i := 0; i < procCount; i++ {
-		diskBytesCopy, err := copyByteArea(i*(int(bundleSize)), (i+1)*(int(bundleSize)), reader)
+		diskBytesCopy, err := verify.CopyByteArea(i*(int(bundleSize)), (i+1)*(int(bundleSize)), reader)
 		if err != nil {
 			return err
 		}
@@ -141,5 +130,8 @@ func SetupCommand(_ *cobra.Command, args []string) error {
 		return err
 	}
 	fmt.Println(string(signature))
+
+	//header, err := core.
+
 	return nil
 }

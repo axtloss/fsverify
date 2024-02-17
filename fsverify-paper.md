@@ -119,8 +119,8 @@ An (unsafe) example using an arduino can look like this:
 // fsverify-serial.ino
 
 void setup() {
-    Serial.setup(9600) // set up a serial tty with the baud rate 9600
-    Serial.print("\tpublic key\t") // Write the public key to the tty
+    Serial.begin(9600); // set up a serial tty with the baud rate 9600
+    Serial.print("\tpublic key\t"); // Write the public key to the tty
 }
 
 void loop() {}

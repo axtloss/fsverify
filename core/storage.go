@@ -2,13 +2,13 @@ package core
 
 import (
 	"bufio"
+	"bytes"
 	"encoding/binary"
 	"encoding/json"
 	"fmt"
+	bolt "go.etcd.io/bbolt"
 	"io"
 	"os"
-
-	bolt "go.etcd.io/bbolt"
 )
 
 type Header struct {
@@ -141,6 +141,8 @@ func ReadDB(partition string) (string, error) {
 	db := make([]byte, header.TableSize*header.TableUnit)
 	n, err := io.ReadFull(reader, db)
 	if err != nil {
+		fmt.Println("failed reading db")
+		fmt.Println(header.TableSize * header.TableUnit)
 		return "", err
 	}
 	if n != header.TableSize*header.TableUnit {
@@ -194,4 +196,15 @@ func GetNode(checksum string, db *bolt.DB) (Node, error) {
 		defer db.Close()
 	}
 	return node, err
+}
+
+func CopyByteArea(start int, end int, reader *bytes.Reader) ([]byte, error) {
+	bytes := make([]byte, end-start)
+	n, err := reader.ReadAt(bytes, int64(start))
+	if err != nil {
+		return nil, err
+	} else if n != end-start {
+		return nil, fmt.Errorf("Unable to read requested size. Got %d, expected %d", n, end-start)
+	}
+	return bytes, nil
 }
