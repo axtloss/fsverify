@@ -104,7 +104,7 @@ func ReadHeader(partition string) (Header, error) {
 	}
 
 	header.Signature = fmt.Sprintf("untrusted comment: fsverify\n%s\ntrusted comment: fsverify\n%s\n", string(UntrustedHash), string(TrustedHash))
-	header.FilesystemSize = int(binary.BigEndian.Uint16(FilesystemSize))
+	header.FilesystemSize = int(binary.BigEndian.Uint32(FilesystemSize))
 	header.TableSize = int(binary.BigEndian.Uint32(TableSize))
 	header.FilesystemUnit = parseUnitSpec(FilesystemUnit)
 	header.TableUnit = parseUnitSpec(TableUnit)

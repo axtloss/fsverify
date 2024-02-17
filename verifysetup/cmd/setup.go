@@ -62,7 +62,7 @@ func checksumBlock(blockStart int, blockEnd int, bundleSize int, diskBytes []byt
 }
 
 func SetupCommand(_ *cobra.Command, args []string) error {
-	if len(args) != 3 {
+	if len(args) != 3 && len(args) != 4 {
 		return fmt.Errorf("Usage: verifysetup setup [partition] [procCount] [fsverify partition output] <minisign directory>")
 	}
 	var minisignDir string
@@ -89,10 +89,6 @@ func SetupCommand(_ *cobra.Command, args []string) error {
 	diskSize := diskInfo.Size()
 	bundleSize := math.Floor(float64(diskSize / int64(procCount)))
 	blockCount := math.Ceil(float64(bundleSize / 2000))
-	lastBlockSize := int(diskSize) - int(bundleSize)*procCount
-	fmt.Println(diskSize)
-	fmt.Println(int(bundleSize))
-	fmt.Println(lastBlockSize)
 	diskBytes := make([]byte, diskSize)
 	_, err = disk.Read(diskBytes)
 	if err != nil {
@@ -139,8 +135,6 @@ func SetupCommand(_ *cobra.Command, args []string) error {
 	if err != nil {
 		return err
 	}
-	fmt.Println(string(signature))
-
 	sig := minisign.Signature{}
 	err = sig.UnmarshalText(signature)
 	if err != nil {
@@ -159,18 +153,13 @@ func SetupCommand(_ *cobra.Command, args []string) error {
 		return err
 	}
 	defer db.Close()
-	fmt.Println("Reading from disk")
 	dbInfo, err := fsverifydb.Stat()
 	if err != nil {
 		return err
 	}
 	dbSize := dbInfo.Size()
-
 	verifyPart := make([]byte, 200+dbSize)
 	header, err := core.CreateHeader(unsignedHash, signedHash, int(diskSize), int(dbSize))
-
-	fmt.Printf("%x\n", header)
-
 	database := make([]byte, dbSize)
 	_, err = fsverifydb.Read(database)
 	if err != nil {

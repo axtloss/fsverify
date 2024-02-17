@@ -37,6 +37,5 @@ func SignDatabase(database string, minisignKeys string) ([]byte, error) {
 		return nil, err
 	}
 	signature := minisign.SignWithComments(privateKey, data, "fsverify", "fsverify")
-	fmt.Printf("SIGNATURE: %x\n", signature)
 	return signature, err
 }

@@ -77,7 +77,6 @@ func CreateHeader(unsignedHash string, signedHash string, diskSize int, tableSiz
 	binary.BigEndian.PutUint32(disk, uint32(diskSize))
 	copy(header[190:], disk)
 
-	fmt.Println(tableSize)
 	db := make([]byte, 4)
 	binary.BigEndian.PutUint32(db, uint32(tableSize))
 	copy(header[195:], db)
