@@ -63,8 +63,8 @@ func AddNode(node verify.Node, tx *bolt.Tx) error {
 	}
 	return nil
 }
-
+/*
 func CreateHeader(unsignedHash string, signedHash string, diskSize int, tableSize int) ([]byte, error) {
 	header := make([]byte, 200)
 
-}
+}*/

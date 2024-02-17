@@ -40,7 +40,7 @@ func checksumBlock(blockStart int, blockEnd int, bundleSize int, diskBytes []byt
 			fmt.Printf("%d:: %d attempted reading from %d to %d. Error %s\n", blockStart, i, i*2000, (i*2000)+2000, err)
 			return
 		}
-		node, err = core.CreateNode(blockStart+i*2000, blockStart+(i*2000)+2000, block, &node, strconv.Itoa(n))
+		node, err = core.CreateNode(i*2000, (i*2000)+2000, block, &node, strconv.Itoa(n))
 		if err != nil {
 			fmt.Printf("%d:: 2 Error %s\n", blockStart, err)
 			return

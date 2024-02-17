@@ -53,21 +53,22 @@ func validateThread(blockStart int, blockEnd int, bundleSize int, diskBytes []by
 		errChan <- err
 	}
 
+	var nodeSum string
 	for int64(totalReadBlocks) < int64(blockCount) {
 		if validateFailed {
 			return
 		}
+		prevNodeSum := nodeSum
 		nodeSum, err := node.GetHash()
 		if err != nil {
 			fmt.Println("Using node ", nodeSum)
 			errChan <- err
 		}
-		node, err := core.GetNode(nodeSum, db)
+		node, err = core.GetNode(nodeSum, db)
 		if err != nil {
+			fmt.Println("Failed to get next node")
 			errChan <- err
 		}
-		fmt.Println("----")
-		fmt.Println(node)
 		part, i, err := core.ReadBlock(node, reader, totalReadBlocks)
 		totalReadBlocks = i
 		if err != nil {
@@ -106,11 +107,6 @@ func ValidateCommand(_ *cobra.Command, args []string) error {
 		return err
 	}
 	fmt.Println("DBFILE: ", dbfile)
-	/*	db, err := core.OpenDB(dbfile, true)
-		if err != nil {
-			return err
-		}*/
-
 	key, err := core.ReadKey()
 	if err != nil {
 		return err
@@ -120,8 +116,8 @@ func ValidateCommand(_ *cobra.Command, args []string) error {
 	if err != nil {
 		return err
 	} else if !verified {
-		//return fmt.Errorf("Signature verification failed\n")
-		fmt.Println("Signature verification failedw")
+		return fmt.Errorf("Signature verification failed\n")
+		//fmt.Println("Signature verification failedw")
 	} else {
 		fmt.Println("Signature verification success!")
 	}
@@ -139,8 +135,6 @@ func ValidateCommand(_ *cobra.Command, args []string) error {
 	diskSize := diskInfo.Size()
 
 	bundleSize := math.Floor(float64(diskSize / int64(config.ProcCount)))
-	//	blockCount := math.Ceil(float64(bundleSize / 2000))
-	//	lastBlockSize := int(diskSize) - int(diskSize)*config.ProcCount
 	diskBytes := make([]byte, diskSize)
 	_, err = disk.Read(diskBytes)
 	if err != nil {
@@ -170,35 +164,6 @@ func ValidateCommand(_ *cobra.Command, args []string) error {
 			return err
 		}
 	}
-
-	/*for int64(core.TotalReadBlocks) < diskInfo.Size() {
-		nodeSum, err := node.GetHash()
-		if err != nil {
-			return err
-		}
-		node, err := core.GetNode(nodeSum, db)
-		if err != nil {
-			return err
-		}
-		fmt.Println("----")
-		fmt.Println(node)
-		part, err := core.ReadBlock(node, reader)
-		if err != nil {
-			return err
-		}
-		hash, err := core.CalculateBlockHash(part)
-		fmt.Println(hash)
-		if err != nil {
-			return err
-		}
-		err = core.VerifyBlock(part, node)
-		if err != nil {
-			fmt.Println("fail")
-			return err
-		}
-		fmt.Printf("Block '%s' ranging from %d to %d matches!\n", node.PrevNodeSum, node.BlockStart, node.BlockEnd)
-
-	}*/
 
 	return nil
 }
