@@ -32,7 +32,6 @@ func validateThread(blockStart int, blockEnd int, bundleSize int, diskBytes []by
 	blockCount := math.Floor(float64(bundleSize / 2000))
 	totalReadBlocks := 0
 
-	fmt.Println("DBFILE: ", dbfile)
 	db, err := core.OpenDB(dbfile, true)
 	if err != nil {
 		errChan <- err
@@ -49,16 +48,13 @@ func validateThread(blockStart int, blockEnd int, bundleSize int, diskBytes []by
 
 	err = core.VerifyBlock(block, node)
 	if err != nil {
-		fmt.Println("fail")
 		errChan <- err
 	}
 
-	var nodeSum string
 	for int64(totalReadBlocks) < int64(blockCount) {
 		if validateFailed {
 			return
 		}
-		prevNodeSum := nodeSum
 		nodeSum, err := node.GetHash()
 		if err != nil {
 			fmt.Println("Using node ", nodeSum)
@@ -78,11 +74,9 @@ func validateThread(blockStart int, blockEnd int, bundleSize int, diskBytes []by
 		}
 		err = core.VerifyBlock(part, node)
 		if err != nil {
-			fmt.Println("fail")
 			errChan <- err
 			validateFailed = true
 			return
-			//fmt.Printf("Block '%s' ranging from %d to %d matches!\n", node.PrevNodeSum, node.BlockStart, node.BlockEnd)
 		}
 
 	}
@@ -90,23 +84,23 @@ func validateThread(blockStart int, blockEnd int, bundleSize int, diskBytes []by
 }
 
 func ValidateCommand(_ *cobra.Command, args []string) error {
-	header, err := core.ReadHeader("./part.fsverify")
-	fmt.Printf("Magic Number: %d\n", header.MagicNumber)
-	fmt.Printf("Signature: %s", header.Signature)
-	fmt.Printf("FsSize: %d\n", header.FilesystemSize)
-	fmt.Printf("FsUnit: %d\n", header.FilesystemUnit)
-	fmt.Printf("Table Size: %d\n", header.TableSize)
-	fmt.Printf("Table Size Unit: %d\n", header.TableUnit)
+	if len(args) != 1 {
+		return fmt.Errorf("Usage: fsverify verify [disk]")
+	}
+	header, err := core.ReadHeader(config.FsVerifyPart)
+
+	if header.MagicNumber != 0xACAB {
+		return fmt.Errorf("sanity bit does not match. Expected %d, got %d", 0xACAB, header.MagicNumber)
+	}
+
 	if err != nil {
 		return err
 	}
 	fmt.Println("Reading DB")
-	//dbfile, err := core.ReadDB("/dev/sda")
-	dbfile, err := core.ReadDB("./part.fsverify")
+	dbfile, err := core.ReadDB(config.FsVerifyPart)
 	if err != nil {
 		return err
 	}
-	fmt.Println("DBFILE: ", dbfile)
 	key, err := core.ReadKey()
 	if err != nil {
 		return err
@@ -117,7 +111,6 @@ func ValidateCommand(_ *cobra.Command, args []string) error {
 		return err
 	} else if !verified {
 		return fmt.Errorf("Signature verification failed\n")
-		//fmt.Println("Signature verification failedw")
 	} else {
 		fmt.Println("Signature verification success!")
 	}
@@ -133,6 +126,10 @@ func ValidateCommand(_ *cobra.Command, args []string) error {
 		return err
 	}
 	diskSize := diskInfo.Size()
+
+	if header.FilesystemSize*header.FilesystemUnit != int(diskSize) {
+		return fmt.Errorf("disk size does not match disk size specified in header. Expected %d, got %d", header.FilesystemSize*header.FilesystemUnit, diskSize)
+	}
 
 	bundleSize := math.Floor(float64(diskSize / int64(config.ProcCount)))
 	diskBytes := make([]byte, diskSize)

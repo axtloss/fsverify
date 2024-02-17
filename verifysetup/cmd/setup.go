@@ -1,17 +1,20 @@
 package cmd
 
 import (
+	"aead.dev/minisign"
 	"bytes"
+	"crypto/ed25519"
+	"encoding/base64"
+	"encoding/binary"
 	"fmt"
-	"math"
-	"os"
-	"strconv"
-	"sync"
-
 	verify "github.com/axtloss/fsverify/core"
 	"github.com/axtloss/fsverify/verifysetup/core"
 	"github.com/spf13/cobra"
 	bolt "go.etcd.io/bbolt"
+	"math"
+	"os"
+	"strconv"
+	"sync"
 )
 
 func NewSetupCommand() *cobra.Command {
@@ -42,7 +45,7 @@ func checksumBlock(blockStart int, blockEnd int, bundleSize int, diskBytes []byt
 		}
 		node, err = core.CreateNode(i*2000, (i*2000)+2000, block, &node, strconv.Itoa(n))
 		if err != nil {
-			fmt.Printf("%d:: 2 Error %s\n", blockStart, err)
+			fmt.Printf("%d:: Attempted creating node for range %d - %d. Error %s\n", blockStart, i*2000, (i*2000)+2000, err)
 			return
 		}
 		nodeChannel <- node
@@ -59,8 +62,14 @@ func checksumBlock(blockStart int, blockEnd int, bundleSize int, diskBytes []byt
 }
 
 func SetupCommand(_ *cobra.Command, args []string) error {
-	if len(args) != 2 {
-		return fmt.Errorf("Usage: verifysetup setup [partition] [procCount]")
+	if len(args) != 3 {
+		return fmt.Errorf("Usage: verifysetup setup [partition] [procCount] [fsverify partition output] <minisign directory>")
+	}
+	var minisignDir string
+	if len(args) != 4 {
+		minisignDir = "./minisign/"
+	} else {
+		minisignDir = args[3]
 	}
 	procCount, err := strconv.Atoi(args[1])
 	if err != nil {
@@ -89,6 +98,7 @@ func SetupCommand(_ *cobra.Command, args []string) error {
 	if err != nil {
 		return err
 	}
+
 	reader := bytes.NewReader(diskBytes)
 	var waitGroup sync.WaitGroup
 	nodeChannels := make([]chan verify.Node, procCount+1)
@@ -125,13 +135,56 @@ func SetupCommand(_ *cobra.Command, args []string) error {
 		}
 	}
 
-	signature, err := core.SignDatabase("./fsverify.db", "./minisign/")
+	signature, err := core.SignDatabase("./fsverify.db", minisignDir)
 	if err != nil {
 		return err
 	}
 	fmt.Println(string(signature))
 
-	//header, err := core.
+	sig := minisign.Signature{}
+	err = sig.UnmarshalText(signature)
+	if err != nil {
+		return err
+	}
 
-	return nil
+	var UntrustedSignature [2 + 8 + ed25519.SignatureSize]byte
+	binary.LittleEndian.PutUint16(UntrustedSignature[:2], sig.Algorithm)
+	binary.LittleEndian.PutUint64(UntrustedSignature[2:10], sig.KeyID)
+	copy(UntrustedSignature[10:], sig.Signature[:])
+	unsignedHash := base64.StdEncoding.EncodeToString(UntrustedSignature[:])
+	signedHash := base64.StdEncoding.EncodeToString(sig.CommentSignature[:])
+
+	fsverifydb, err := os.Open("./fsverify.db")
+	if err != nil {
+		return err
+	}
+	defer db.Close()
+	fmt.Println("Reading from disk")
+	dbInfo, err := fsverifydb.Stat()
+	if err != nil {
+		return err
+	}
+	dbSize := dbInfo.Size()
+
+	verifyPart := make([]byte, 200+dbSize)
+	header, err := core.CreateHeader(unsignedHash, signedHash, int(diskSize), int(dbSize))
+
+	fmt.Printf("%x\n", header)
+
+	database := make([]byte, dbSize)
+	_, err = fsverifydb.Read(database)
+	if err != nil {
+		return err
+	}
+
+	copy(verifyPart, header)
+	copy(verifyPart[200:], database)
+
+	verifyfs, err := os.Create(args[2])
+	if err != nil {
+		return err
+	}
+	defer verifyfs.Close()
+	_, err = verifyfs.Write(verifyPart)
+	return err
 }

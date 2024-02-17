@@ -27,7 +27,7 @@ func fileReadKey() (string, error) {
 	reader := bufio.NewReader(file)
 	n, err := reader.Read(key)
 	if n != 56 {
-		return "", fmt.Errorf("Error: Key does not match expected key size. expected 56, got %d", n)
+		return "", fmt.Errorf("Key does not match expected key size. Expected 56, got %d", n)
 	}
 	if err != nil {
 		return "", err
@@ -74,7 +74,7 @@ func serialReadKey() (string, error) {
 	key = strings.ReplaceAll(key, "\\t", "")
 	key = strings.ReplaceAll(key, "\"", "")
 	if len(key) != 56 {
-		return "", fmt.Errorf("Error: Key does not match expected key size. expected 56, got %d", len(key))
+		return "", fmt.Errorf("Key does not match expected key size. Expected 56, got %d", len(key))
 	}
 	return key, nil
 }
@@ -132,7 +132,7 @@ func VerifyBlock(block []byte, node Node) error {
 	if strings.Compare(calculatedBlockHash, strings.TrimSpace(wantedBlockHash)) == 0 {
 		return nil
 	}
-	return fmt.Errorf("Error: Node %s ranging from %d to %d does not match block. Expected %s, got %s.", node.PrevNodeSum, node.BlockStart, node.BlockEnd, wantedBlockHash, calculatedBlockHash)
+	return fmt.Errorf("Node %s ranging from %d to %d does not match block. Expected %s, got %s.", node.PrevNodeSum, node.BlockStart, node.BlockEnd, wantedBlockHash, calculatedBlockHash)
 }
 
 func VerifyNode(node Node, nextNode Node) error {

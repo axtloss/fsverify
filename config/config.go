@@ -10,3 +10,6 @@ var KeyLocation = "/dev/ttyACM1"
 // The amount of threads the DB was created with, has to be the amount of processes
 // verifysetup was set to use
 var ProcCount = 12
+
+// Which partition/file to use as the fsverify partition
+var FsVerifyPart = "./verifysetup/part.fsverify"

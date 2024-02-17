@@ -103,13 +103,13 @@ func ReadHeader(partition string) (Header, error) {
 		return Header{}, err
 	}
 
-	header.Signature = fmt.Sprintf("untrusted comment: fsverify\r\n%s\r\ntrusted comment: fsverify\r\n%s\r\n", UntrustedHash, TrustedHash)
+	header.Signature = fmt.Sprintf("untrusted comment: fsverify\n%s\ntrusted comment: fsverify\n%s\n", string(UntrustedHash), string(TrustedHash))
 	header.FilesystemSize = int(binary.BigEndian.Uint16(FilesystemSize))
 	header.TableSize = int(binary.BigEndian.Uint32(TableSize))
 	header.FilesystemUnit = parseUnitSpec(FilesystemUnit)
 	header.TableUnit = parseUnitSpec(TableUnit)
 	if header.FilesystemUnit == -1 || header.TableUnit == -1 {
-		return Header{}, fmt.Errorf("Error: unit size for Filesystem or Table invalid: fs: %x, table: %x", FilesystemUnit, TableUnit)
+		return Header{}, fmt.Errorf("unit size for Filesystem or Table invalid: fs: %x, table: %x", FilesystemUnit, TableUnit)
 	}
 	return header, nil
 }
@@ -146,7 +146,7 @@ func ReadDB(partition string) (string, error) {
 		return "", err
 	}
 	if n != header.TableSize*header.TableUnit {
-		return "", fmt.Errorf("Error: Database is not expected size. Got: %d, expected %d", n, header.TableSize*header.TableUnit)
+		return "", fmt.Errorf("Database is not expected size. Expected %d, got %d", header.TableSize*header.TableUnit, n)
 	}
 	fmt.Printf("db: %d\n", n)
 
@@ -204,7 +204,7 @@ func CopyByteArea(start int, end int, reader *bytes.Reader) ([]byte, error) {
 	if err != nil {
 		return nil, err
 	} else if n != end-start {
-		return nil, fmt.Errorf("Unable to read requested size. Got %d, expected %d", n, end-start)
+		return nil, fmt.Errorf("Unable to read requested size. Expected %d, got %d", end-start, n)
 	}
 	return bytes, nil
 }
