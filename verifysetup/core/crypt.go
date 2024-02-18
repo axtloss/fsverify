@@ -11,6 +11,7 @@ import (
 	"strings"
 )
 
+// CalculateBlockHash calculates the sha1 checksum of a byte slice.
 func CalculateBlockHash(block []byte) (string, error) {
 	hash := sha1.New()
 	if _, err := io.Copy(hash, bytes.NewReader(block)); err != nil {
@@ -20,6 +21,8 @@ func CalculateBlockHash(block []byte) (string, error) {
 	return strings.TrimSpace(fmt.Sprintf("%x", hashInBytes)), nil
 }
 
+// SignDatabase generates a minisign signature of the database using given keys.
+// The minisign signature uses "fsverify" as the comments to ensure predictability when fsverify verifies the signature.
 func SignDatabase(database string, minisignKeys string) ([]byte, error) {
 	fmt.Print("Enter your password (will not echo): ")
 	p, err := term.ReadPassword(int(os.Stdin.Fd()))

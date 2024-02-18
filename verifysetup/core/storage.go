@@ -10,8 +10,8 @@ import (
 	bolt "go.etcd.io/bbolt"
 )
 
-var TotalReadBlocks = 0
-
+// ReadBlock reads the bytes in a specified ranges from a bytes.Reader.
+// It additionally verifies that the amount of bytes read match with the size of the area and fails if the they do not match.
 func ReadBlock(start int, end int, device *bytes.Reader) ([]byte, error) {
 	if end-start < 0 {
 		return []byte{}, fmt.Errorf("tried creating byte slice with negative length. %d to %d total %d\n", start, end, end-start)
@@ -24,10 +24,11 @@ func ReadBlock(start int, end int, device *bytes.Reader) ([]byte, error) {
 		return []byte{}, err
 	}
 	_, err = device.Read(block)
-	TotalReadBlocks = TotalReadBlocks + (end - start)
 	return block, err
 }
 
+// CreateNode creates a Node based on given parameters.
+// If prevNode is set to nil, meaning this node is the first node in a verification chain, prevNodeHash is set to "EntrypointN" with N being the number of entrypoint.
 func CreateNode(blockStart int, blockEnd int, block []byte, prevNode *verify.Node, n string) (verify.Node, error) {
 	node := verify.Node{}
 	node.BlockStart = blockStart
@@ -50,6 +51,8 @@ func CreateNode(blockStart int, blockEnd int, block []byte, prevNode *verify.Nod
 	return node, nil
 }
 
+// AddNode adds a node to the bucket "Nodes" in the database.
+// It assumes that a database transaction has already been started and takes bolt.Tx as an argument.
 func AddNode(node verify.Node, tx *bolt.Tx) error {
 	if node.BlockStart == node.BlockEnd {
 		return nil
@@ -66,6 +69,7 @@ func AddNode(node verify.Node, tx *bolt.Tx) error {
 	return nil
 }
 
+// CreateHeader creates a header to be used in an fsverify partition containing all necessary information.
 func CreateHeader(unsignedHash string, signedHash string, diskSize int, tableSize int) ([]byte, error) {
 	header := make([]byte, 200)
 	header[0] = 0xAC

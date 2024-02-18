@@ -11,6 +11,7 @@ import (
 	"os"
 )
 
+// Header contains all information stored in the header of a fsverify partition.
 type Header struct {
 	MagicNumber    int
 	Signature      string
@@ -20,6 +21,8 @@ type Header struct {
 	TableUnit      int
 }
 
+// Node contains all information stored in a database node.
+// If the Node is the first node in the database, PrevNodeSum should be set to Entrypoint.
 type Node struct {
 	BlockStart  int
 	BlockEnd    int
@@ -27,10 +30,14 @@ type Node struct {
 	PrevNodeSum string
 }
 
+// GetHash returns the hash of all fields of a Node combined.
+// The Node fields are combined in the order BlockStart, BlockEnd, BlockSum and PrevNodeSum
 func (n *Node) GetHash() (string, error) {
 	return calculateStringHash(fmt.Sprintf("%d%d%s%s", n.BlockStart, n.BlockEnd, n.BlockSum, n.PrevNodeSum))
 }
 
+// parseUnitSpec parses the file size unit specified in the header and returns it as an according multiplier.
+// In the case of an invalid Unit byte the function returns -1.
 func parseUnitSpec(size []byte) int {
 	switch size[0] {
 	case 0:
@@ -50,6 +57,8 @@ func parseUnitSpec(size []byte) int {
 	}
 }
 
+// ReadHeader reads the partition header and puts it in a variable of type Header.
+// If any field fails to be read, the function returns an empty Header struct and the error.
 func ReadHeader(partition string) (Header, error) {
 	_, exist := os.Stat(partition)
 	if os.IsNotExist(exist) {
@@ -63,6 +72,10 @@ func ReadHeader(partition string) (Header, error) {
 
 	header := Header{}
 	reader := bufio.NewReader(part)
+	// Since the size of each field is already known
+	// it is best to hard code them, in the case
+	// that a field goes over its allocated size
+	// fsverify should (and will) fail
 	MagicNumber := make([]byte, 2)
 	UntrustedHash := make([]byte, 100)
 	TrustedHash := make([]byte, 88)
@@ -114,6 +127,9 @@ func ReadHeader(partition string) (Header, error) {
 	return header, nil
 }
 
+// ReadDB reads the database from a fsverify partition.
+// It verifies the the size of the database with the size specified in the partition header and returns an error if the sizes do not match.
+// Due to limitations with bbolt the database gets written to a temporary path and the function returns the path to the database.
 func ReadDB(partition string) (string, error) {
 	_, exist := os.Stat(partition)
 	if os.IsNotExist(exist) {
@@ -126,6 +142,9 @@ func ReadDB(partition string) (string, error) {
 	defer part.Close()
 	reader := bufio.NewReader(part)
 
+	// The area taken up by the header
+	// it is useless for this reader instance
+	// and will be skipped completely
 	_, err = reader.Read(make([]byte, 200))
 	if err != nil {
 		fmt.Println(err)
@@ -138,11 +157,13 @@ func ReadDB(partition string) (string, error) {
 		return "", err
 	}
 
+	// Reading the specified table size allows for tamper protection
+	// in the case that the partition was tampered with "lazily"
+	// meaning that only the database was modified, and not the header
+	// if that is the case, the database would be lacking data, making it unusable
 	db := make([]byte, header.TableSize*header.TableUnit)
 	n, err := io.ReadFull(reader, db)
 	if err != nil {
-		fmt.Println("failed reading db")
-		fmt.Println(header.TableSize * header.TableUnit)
 		return "", err
 	}
 	if n != header.TableSize*header.TableUnit {
@@ -150,11 +171,16 @@ func ReadDB(partition string) (string, error) {
 	}
 	fmt.Printf("db: %d\n", n)
 
+	// Write the database to a temporary directory
+	// to ensure that it disappears after the next reboot
 	temp, err := os.MkdirTemp("", "*-fsverify")
 	if err != nil {
 		return "", err
 	}
 
+	// The file permission is immediately set to 0700
+	// this ensures that the database is not modified
+	// after it has been written
 	err = os.WriteFile(temp+"/verify.db", db, 0700)
 	if err != nil {
 		return "", err
@@ -163,6 +189,7 @@ func ReadDB(partition string) (string, error) {
 	return temp + "/verify.db", nil
 }
 
+// OpenDB opens a bbolt database and returns a bbolt instance.
 func OpenDB(dbpath string, readonly bool) (*bolt.DB, error) {
 	_, exist := os.Stat(dbpath)
 	if os.IsNotExist(exist) {
@@ -175,6 +202,8 @@ func OpenDB(dbpath string, readonly bool) (*bolt.DB, error) {
 	return db, nil
 }
 
+// GetNode retrieves a Node from the database based on the hash identifier.
+// If db is set to nil, the function will open the database in read-only mode itself.
 func GetNode(checksum string, db *bolt.DB) (Node, error) {
 	var err error
 	var deferDB bool
@@ -198,7 +227,14 @@ func GetNode(checksum string, db *bolt.DB) (Node, error) {
 	return node, err
 }
 
+// CopyByteArea copies an area of bytes from a reader.
+// It verifies that the reader reads the wanted amount of bytes, and returns an error if this is not the case.
 func CopyByteArea(start int, end int, reader *bytes.Reader) ([]byte, error) {
+	if end-start < 0 {
+		return []byte{}, fmt.Errorf("tried creating byte slice with negative length. %d to %d total %d\n", start, end, end-start)
+	} else if end-start > 2000 {
+		return []byte{}, fmt.Errorf("tried creating byte slice with length over 2000. %d to %d total %d\n", start, end, end-start)
+	}
 	bytes := make([]byte, end-start)
 	n, err := reader.ReadAt(bytes, int64(start))
 	if err != nil {

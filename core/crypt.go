@@ -8,6 +8,7 @@ import (
 	"strings"
 )
 
+// calculateStringHash calculates the sha1 checksum of a given string a.
 func calculateStringHash(a string) (string, error) {
 	hash := sha1.New()
 	hash.Write([]byte(a))
@@ -15,9 +16,10 @@ func calculateStringHash(a string) (string, error) {
 	return strings.TrimSpace(fmt.Sprintf("%x", hashInBytes)), nil
 }
 
-func CalculateBlockHash(block []byte) (string, error) {
+// CalculateBlockHash calculates the sha1 checksum of a given byte slice b.
+func CalculateBlockHash(b []byte) (string, error) {
 	hash := sha1.New()
-	if _, err := io.Copy(hash, bytes.NewReader(block)); err != nil {
+	if _, err := io.Copy(hash, bytes.NewReader(b)); err != nil {
 		return "", err
 	}
 	hashInBytes := hash.Sum(nil)[:20]
