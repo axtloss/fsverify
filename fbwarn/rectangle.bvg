@@ -1,0 +1,47 @@
+// Single line comments are started with //
+
+/*
+A multiline comment can be
+done in this fashion
+basically like C
+*/
+
+
+// The IMG function is always required
+// it initializes the image with its size
+IMG (size=100, width=100)
+
+// A function call can be split across multiple lines
+
+// The viewport function defines the view of an image
+// it functions like the svg viewport function
+viewport (x=0,
+	  y=0,
+	  height=100,
+	  width=100)
+
+// A rectangle 
+rectangle (x=0, y=0,
+	   height=100,
+	   width=100,
+	   color="#5BCEFA",
+	   fill=true,
+	  thickness=0)
+
+rectangle (x=20, y=0,
+	   height=60,
+	   width=100,
+	   color="#F5A9B8",
+	   fill=true,
+	   thickness=0)
+
+rectangle (x=40, y=0,
+	   height=20
+	   width=100,
+	   color="#FFFFFF",
+	   fill=true,
+	   thickness=0)
+/*
+ A bvg file is parsed from top to bottom
+ This means that the lowest element gets drawn over existing elements
+*/

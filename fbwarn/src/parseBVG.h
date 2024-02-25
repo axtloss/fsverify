@@ -1,4 +1,10 @@
 #include <stdio.h>
-FILE readFile(char*);
+#include <stdlib.h>
+#include "raylib.h"
+#include "BVGTypes.h"
+
+void BVGDrawRectangle(BVGRectangle*);
+FILE *readFile(char*);
 char *multiToSingle(char*);
-void matchFunctionCall(char*);
+void matchFunctionCall(char *);
+BVGRectangle *BVGParseRectangle(char*[7]);
