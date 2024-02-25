@@ -1,1 +1,2 @@
-char *strlwr(char*);
+char *strlwr(char *);
+char *trim(char *);
