@@ -45,11 +45,11 @@ func parseUnitSpec(size []byte) int {
 	case 1:
 		return 1000
 	case 2:
-		return 1000000
+		return 1000 * 1000
 	case 3:
-		return 1000000000
+		return 1000 * 1000 * 10000
 	case 4:
-		return 1000000000000
+		return 100000000000000
 	case 5:
 		return 1000000000000000
 	default:

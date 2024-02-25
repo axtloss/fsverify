@@ -1,0 +1,6 @@
+[submodule "fbwarn/lvgl"]
+	path = fbwarn/lvgl
+	url = https://github.com/lvgl/lvgl
+[submodule "fbwarn/lv_drivers"]
+	path = fbwarn/lv_drivers
+	url = https://github.com/lvgl/lv_drivers
