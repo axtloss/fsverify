@@ -2,25 +2,43 @@
 #include "parseBVG.h"
 #include <string.h>
 #include <stdlib.h>
+#include <unistd.h>
 
 int main(void) {
-  char *str, *single, *toFree;
-  toFree = str = strdup("rectangle (x=20,y=30,\nwidth=200,\nheight=300,\ncolor='#F5A9B8')\n");
-  if (str == NULL)
+  char *rectA, *rectB, *rectC, *rectAFree, *rectBFree, *rectCFree, *singleA, *singleB, *singleC;
+  rectAFree = rectA = strdup("rectangle (x=0,y=0,\nwidth=100,\nheight=100,\ncolor='#5BCEFA')\n");
+  if (rectA == NULL)
     return 1;
-  printf("Multi:\n %s", str);
-  single = multiToSingle(str);
-  printf("Single:\n %s\n", single);
-  free(toFree);
-    
-  InitWindow (800, 450, "raylib");
+  singleA = multiToSingle(rectA);
+  free(rectAFree);
+
+  rectBFree = rectB = strdup("rectangle (x=0,y=20,\nwidth=100,\nheight=60,\ncolor='#F5A9B8')\n");
+  if (rectB == NULL)
+    return 1;
+  singleB = multiToSingle(rectB);
+  free(rectBFree);
+
+  rectCFree = rectC = strdup("rectangle (x=0,y=40,\nwidth=100,\nheight=20,\ncolor='#FFFFFF')\n");
+  if (rectC == NULL)
+    return 1;
+  singleC = multiToSingle(rectC);
+  free(rectCFree);
+  
+  InitWindow (100, 100, ":3");
 
   while (!WindowShouldClose ()) {
     BeginDrawing ();
     ClearBackground (RAYWHITE);
-    DrawText ("TEXT", 190, 200, 20, LIGHTGRAY);
-    char *parse = strdup(single);
-    matchFunctionCall(parse);
+
+    char *parseA = strdup(singleA);
+    matchFunctionCall(parseA);
+    
+    char *parseB = strdup(singleB);
+    matchFunctionCall(parseB);
+    
+    char *parseC = strdup(singleC);
+    matchFunctionCall(parseC);
+    DrawText ("tranmsgenmer", 15, 50, 10, MAROON);
     EndDrawing ();
   }
 
