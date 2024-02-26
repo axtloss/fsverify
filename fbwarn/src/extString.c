@@ -2,21 +2,21 @@
 #include <string.h>
 #include <ctype.h>
 
-char *strlwr(char *str)
+char *strlwr(char *s)
 {
-  unsigned char *p = (unsigned char *)str;
+  unsigned char *p = (unsigned char *)s;
 
   while (*p) {
      *p = tolower((unsigned char)*p);
       p++;
   }
 
-  return str;
+  return s;
 }
 
-char *trim(char *str)
+char *trim(char *s)
 {
-  char *result = strdup(str);
+  char *result = strdup(s);
   char *end;
 
   while(isspace((unsigned char)*result)) result++;
@@ -32,3 +32,33 @@ char *trim(char *str)
 
   return result;
 }
+
+char *replaceStr(char *s, char *old, char *replace) {
+  char* result; 
+  int i, cnt = 0; 
+  size_t newSize = strlen(replace); 
+  size_t oldSize = strlen(old); 
+ 
+  for (i = 0; s[i] != '\0'; i++) { 
+    if (strstr(&s[i], old) == &s[i]) { 
+      cnt++; 
+      i += oldSize - 1; 
+    } 
+  } 
+
+  result = (char*)malloc(i + cnt * (newSize - oldSize) + 1); 
+ 
+  i = 0; 
+  while (*s) { 
+    if (strstr(s, old) == s) { 
+      strcpy(&result[i], replace); 
+      i += newSize; 
+      s += oldSize; 
+    } 
+    else
+      result[i++] = *s++; 
+  } 
+ 
+  result[i] = '\0'; 
+  return result; 
+};

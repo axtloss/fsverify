@@ -4,18 +4,20 @@
 #include "raylib.h"
 #include "BVGTypes.h"
 
-FILE *readFile(char *);
-char *multiToSingle(char *);
-void matchFunctionCall(char *);
-void collectArgs(char *[], char *, int);
-void orderArgs(char *[], char *[], int, char *[]);
-Color *parseColorFromHex(char *);
-bool parseBoolValue(char *);
+FILE *readFile(char *path);
+char *multiToSingle(char *s);
+void matchFunctionCall(char *call);
+void collectArgs(char *res[], char *call, int n);
+void orderArgs(char *res[], char *argv[], int n, char *knownArgs[]);
+Color *parseColorFromHex(char *hex);
+bool parseBoolValue(char *hex);
 
 // Shape functions
-BVGRectangle *BVGParseRectangle(char *[7]);
-void BVGDrawRectangle(BVGRectangle*);
-BVGRoundedRectangle *BVGParseRoundedRectangle(char *[9]);
-void BVGDrawRoundedRectangle(BVGRoundedRectangle*);
-BVGCircle *BVGParseCircle(char *[4]);
-void BVGDrawCircle(BVGCircle);
+BVGRectangle *BVGParseRectangle(char *argv[7]);
+void BVGDrawRectangle(BVGRectangle *rectangle);
+BVGRoundedRectangle *BVGParseRoundedRectangle(char *argv[9]);
+void BVGDrawRoundedRectangle(BVGRoundedRectangle *rectangle);
+BVGCircle *BVGParseCircle(char *argv[4]);
+void BVGDrawCircle(BVGCircle *circle);
+BVGRing *BVGParseRing(char *argv[8]);
+void BVGDrawRing(BVGRing *ring);

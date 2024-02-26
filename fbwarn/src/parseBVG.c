@@ -35,6 +35,11 @@ void BVGDrawCircle(BVGCircle *circle) {
   }
 }
 
+void BVGDrawRing(BVGRing *ring) {
+  Vector2 center = {ring->centerX, ring->centerY};
+  DrawRing(center, ring->inRadius, ring->outRadius, ring->startAngle, ring->endAngle, ring->segmets, ring->color);
+}
+
 void BVGDrawText(BVGText *text) {
   DrawText(text->text, text->x, text->y, text->fontSize, text->color);
 }
@@ -53,15 +58,12 @@ FILE *readFile(char *path) {
   Converts a multiline function
   call into a single line call
 */
-char *multiToSingle(char *lines) {
+char *multiToSingle(char *s) {
   // allocating the size of lines is safe since characters arent added
-  char *result = malloc (strlen(lines)+1);
+  char *midresult = malloc (strlen(s)+1);
   char *line;
-  while ((line = strsep(&lines, "\n")) != NULL)
-    sprintf(result, "%s%s", result, line);
-
-  free(line);
-  return result; 
+  midresult = replaceStr(s, "\n", "");
+  return replaceStr(midresult, ", ", ",");
 }
 
 /*
@@ -246,6 +248,33 @@ BVGCircle *BVGParseCircleSegment(char *argv[7]) {
   return result;
 }
 
+BVGRing *BVGParseRing(char *argv[8]) {
+  BVGRing *result = malloc(sizeof(BVGRing));
+  size_t argN = 8;
+  char *args[argN];
+  char *knownArgs[8] = {"x", "y", "innerradius", "outerradius", "startangle", "endangle", "segments", "color"};
+  orderArgs(args, argv, argN, knownArgs);
+  int x, y, segments;
+  float innerRadius, outerRadius, startAngle, endAngle;
+  Color *clr;
+  sscanf(args[0], "%d", &x);
+  sscanf(args[1], "%d", &y);
+  sscanf(args[2], "%f", &innerRadius);
+  sscanf(args[3], "%f", &outerRadius);
+  sscanf(args[4], "%f", &startAngle);
+  sscanf(args[5], "%f", &endAngle);
+  sscanf(args[6], "%d", &segments);
+  args[7] = args[7]+2;
+  args[7][strlen(args[7])-1] = '\0';
+  clr = parseColorFromHex(args[7]);
+  result->centerX=x; result->centerY=y;
+  result->inRadius=innerRadius; result->outRadius=outerRadius;
+  result->startAngle=startAngle; result->endAngle=endAngle;
+  result->segmets=segments;
+  result->color=*clr;
+  return result;
+}
+
 BVGText *BVGParseText(char *argv[5]) {
   BVGText *result = malloc(sizeof(BVGText));
   size_t argN = 5;
@@ -275,7 +304,7 @@ BVGText *BVGParseText(char *argv[5]) {
 /*
   Takes a BVG function call and calls the according C function
 */
-void matchFunctionCall(char *call, void *ret) {
+void matchFunctionCall(char *call) {
   printf("Matching %s\n", call);
   char *funcCall = strdup(call);
   char *funcName = strsep(&funcCall, "(");
@@ -284,12 +313,12 @@ void matchFunctionCall(char *call, void *ret) {
   printf("Got function %s\n", function);
   call[strlen(call)-1]='\0';
   if (strcmp(function, "rectangle") == 0) {
-      char *argv[7];
-      call = call+strlen("rectangle (");
-      collectArgs(argv, call, 7);
-      BVGRectangle *rect = malloc(sizeof(BVGRectangle)); 
-      rect = BVGParseRectangle(argv);
-      BVGDrawRectangle(rect);
+    char *argv[7];
+    call = call+strlen("rectangle (");
+    collectArgs(argv, call, 7);
+    BVGRectangle *rect = malloc(sizeof(BVGRectangle)); 
+    rect = BVGParseRectangle(argv);
+    BVGDrawRectangle(rect);
   } else if (strcmp(function, "roundedrectangle") == 0) {
     char *argv[9];
     call = call+strlen("roundedrectangle (");
@@ -311,6 +340,13 @@ void matchFunctionCall(char *call, void *ret) {
     BVGCircle *circle = malloc(sizeof(BVGCircle));
     circle = BVGParseCircleSegment(argv);
     BVGDrawCircle(circle);
+  } else if (strcmp(function, "ring") == 0) {
+    char *argv[8];
+    call = call+strlen("ring (");
+    collectArgs(argv, call, 8);
+    BVGRing *ring = malloc(sizeof(BVGRing));
+    ring = BVGParseRing(argv);
+    BVGDrawRing(ring);
   } else if (strcmp(function, "text") == 0) {
     char *argv[5];
     call = call+strlen("text (");

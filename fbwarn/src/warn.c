@@ -19,13 +19,15 @@ int main(void) {
   singleB = multiToSingle(rectB);
   free(rectBFree);
 
-  rectCFree = rectC = strdup("circlesegment (x=300,y=200,radius=100,color='#BE79A7FF',startangle=0.0,endangle=90.0,segments=10)");
+  rectCFree = rectC = strdup("circlesegment (x=300, y=200,radius=100,color='#BE79A7FF',startangle=0.0,endangle=90.0,segments=10)");
   if (rectC == NULL)
     return 1;
   singleC = multiToSingle(rectC);
+  printf("SingleC %s", rectC);
   free(rectCFree);
 
-  rectDFree = rectD = strdup("text (text='haiii :3',x=300,y=10,size=50,color='#DD98E5FF')");
+  rectDFree = rectD = strdup("ring (x=300,y=50,innerradius=20,outerradius=30,startangle=0.0,endangle=360.0,segments=10,color='#DD98E5FF')");
+  //  rectDFree = rectD = strdup("text (text='haiii :3',x=300,y=10,size=50,color='#DD98E5FF')");
   if (rectD == NULL)
     return 1;
   singleD = multiToSingle(rectD);

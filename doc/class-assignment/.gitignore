@@ -1,0 +1,8 @@
+*~
+*.aux
+*dvi
+auto/
+*.log
+*.xml
+*.toc
+*.out
