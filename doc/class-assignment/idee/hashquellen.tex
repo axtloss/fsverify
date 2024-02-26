@@ -1,0 +1,21 @@
+\subsection{Hash Quellen}
+Wie bereits gesagt, braucht das Verifizierungsprogramm eine vertraute Quelle für die korrekten Hashes.
+Hier gibt es auch verschiedene Lösungsansätze, was jedoch alle gemeinsam haben ist, dass sie eine Quelle und eine sichere Methode um diese Quelle zu verifizieren brauchen.
+\\
+Für die Quellen gibt es viele verschieden möglichkeiten, bei der Entwicklung von fsverify hatte ich die Wahl auf zwei möglichkeiten begrenzt, da beide sehr einfach zu implementieren sind, und dadurch die Verifizierung der Quellen auch einfach ist.
+\begin{itemize}
+\item Externe Partition\\
+  Hier wird eine Datenbank an Hashes zusammen mit allen Metadaten in eine extra Partition geschrieben, diese Partition kann auf ein Externes medium geschrieben werden, und nur dann angeschlossen sein, wenn das System die Verizifizierung durchführt.
+  Jedoch braucht dies entweder eine seperate Partition auf der Festplatte, wodurch die nutzbare Speicherkapazität sich verringert, oder ein externes Medium, welches nicht immer vorhanden ist.
+\item Einfache Datei\\
+  Hier wird die Datenbank einfach in einem Ort gespeichert, auf die das Program während der Verifizierung zugreifen kann. Dies ist sehr einfach zu implementieren und benötigt keine externen Partitionen oder Speichermedien. Das Problem ist es jedoch, die Datei an einem ort zu speichern, bei der man nicht unverifizierte Dateisysteme anhängen muss oder ungeschützt ohne schreibschutz offen ist.
+\end{itemize}
+\\
+Um die Quelle zu schützen beziehungsweise zu Verifizieren, gibt es zwei Methoden:
+\begin{itemize}
+\item Kryptographische Verifizierung\\
+  Die Entwickler des Betriebssystems müssen hierbei bei dem aufsetzen des Verifizierungsprogramms die Hash Quelle Kryptographisch mit ihren privaten Schlüsseln signieren (zum Beispiel mit GnuPG oder Minisgin), das Verifizierungsprogramm erhält den öffentlischen Schlüssel der Entwickler, die Signatur und die Quelle, wodurch es anhand der Signatur verifizieren kann, dass die Quelle von den Entwicklern stammt und nicht modifiziert wurde.\\
+  Hierbei ist das größte Problem, dass der öffentliche Schlüssel gut geschützt werden muss, damit die Signatur und Schlüssel nicht mit der eines Attackers ersetzt werden kann.
+\item Verschlüsselung\\
+  Die Quelle ist mit einem zufällig generierten Schlüssel verschlüsselt, welcher in dem Quellcode des Verifizierungsprogrammes geschrieben wird, um somit den Schlüssel direkt im Programm zu speichern. Dadurch können keine Schlüssel ersetzt werden, jedoch ist es immer möglich, den Schlüssel aus dem Programm zu extrahieren, ohne überhaupt auf das System zugreifen zu müssen, da man das Betriebssystem selber installieren kann. Sobald der Schlüssel bekannt ist, kann die Datei einfach verschlüsselt und ohne Probleme modifiziert werden.
+\end{itemize}

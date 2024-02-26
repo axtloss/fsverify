@@ -1,0 +1,15 @@
+\subsection{Gewählte Implementation}
+Im anbetracht existierender Dateiverifizierungsprogrammen wie Androids dm-verity und mein vorheriges, ähnliches Projekt \href{https://github.com/linux-immutability-tools/FsGuard}{FsGuard}.
+\\
+Für die Implementation habe ich die Blockverifizierung ausgewählt, da sie durch Multithreading sehr schnell sein kann, aber auch neue Datein bemerkt, welches die Per-Datei Verifizierung nicht gewährleistet.
+\\
+Um die Hashes zu Speichern wird ein eigenes Partitionsschema benutzt, welches alle Metadaten und die Datenbank beinhaltet. Der minisign öffentliche Schlüssel kann durch mehrere Methoden gespeichert werden, wie einer Textdatei oder einem gerät welches über USB-Serial den Schlüssel übergibt.
+\\
+Weitere Eintscheidungen für die Implementation sind:
+\begin{itemize}
+\item Programmiersprache: go\\
+  go ist mir vertraut und memory safe, welches für die Sicherheit des Programmes eine große Rolle spielt.
+\item Datenbank: bbolt\\
+  bbolt ist eine Datenbank welche direkt in go geschrieben wurde und somit ein Robusteren API als sqlite hat, zudem ist bbolt unter einer richtigen lizens lizensiert und wirkt moderner.
+\end{itemize}
+  

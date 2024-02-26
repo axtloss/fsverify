@@ -1,0 +1,40 @@
+\documentclass[12pt,a4paper]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{graphicx}
+\usepackage{hyperref}
+\usepackage{csquotes}
+\usepackage[left=2.50cm, right=2.50cm, top=2.50cm, bottom=2.50cm]{geometry}
+\usepackage[german]{babel}
+\usepackage{svg}
+\usepackage{setspace}
+\usepackage{tocbibind}
+\usepackage[style=reading,backend=bibtex]{biblatex}
+
+\hypersetup{
+	colorlinks   = true,    % Colours links instead of ugly boxes
+	urlcolor     = cyan,    % Colour for external hyperlinks
+	linkcolor    = cyan,    % Colour of internal links
+	citecolor    = black      % Colour of citations
+}
+\title{fsverify}
+\author{-}
+\setstretch{1.5}
+\begin{document}
+\pagenumbering{gobble}
+\include{Title}
+\clearpage
+\newpage
+\tableofcontents
+\pagenumbering{arabic}
+\newpage
+\section{Idee}
+\input{idee/idee}
+\end{document}
+
+%%% Local Variables:
+%%% mode: LaTeX
+%%% TeX-master: t
+%%% End:
