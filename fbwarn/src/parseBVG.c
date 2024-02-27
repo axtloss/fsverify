@@ -22,6 +22,7 @@ void BVGDrawRoundedRectangle(BVGRoundedRectangle *rectangle) {
   } else {
     DrawRectangleRoundedLines(rectangle->rectangle.rayrectangle, rectangle->roundness, rectangle->segments, rectangle->rectangle.lineThickness, rectangle->rectangle.color);
   }
+  return;
 }
 
 void BVGDrawCircle(BVGCircle *circle) {
@@ -31,6 +32,7 @@ void BVGDrawCircle(BVGCircle *circle) {
   } else {
     DrawCircle(circle->centerX, circle->centerY, circle->radius, circle->color);
   }
+  return;
 }
 
 void BVGDrawRing(BVGRing *ring) {
@@ -44,10 +46,12 @@ void BVGDrawTriangle(BVGTriangle *triangle) {
   } else {
     DrawTriangleLines(triangle->corner1, triangle->corner2, triangle->corner3, triangle->color);
   }
+  return;
 }
 
 void BVGDrawText(BVGText *text) {
   DrawText(text->text, text->x, text->y, text->fontSize, text->color);
+  return;
 }
 
 // reads a given file
@@ -65,13 +69,15 @@ FILE *readFile(char *path) {
   call into a single line call
 */
 char *multiToSingle(char *s) {
-  // allocating the size of lines is safe since characters arent added
-  char *midresult = malloc (strlen(s)+1);
-  char *notab = malloc(strlen(s)+1);
-  char *line;
+  char *midresult;
+  char *notab;
+  char *result;
   midresult = replaceStr(s, "\n", "");
   notab = replaceStr(midresult, "\t", "");
-  return replaceStr(notab, ", ", ",");
+  result = replaceStr(midresult, ", ", ",");
+  free(midresult);
+  free(notab);
+  return result;
 }
 
 /*
@@ -113,7 +119,7 @@ void orderArgs(char *res[], char *argv[], int n, char *knownArgs[]) {
 */
 Color *parseColorFromHex(char *hex) {
   Color *clr = malloc(sizeof(Color));
-  int r,g,b,a;
+  int r,g,b,a = 0;
   if (strlen(hex) == 6) {
     sscanf(hex, "%02x%02x%02x", &r, &g, &b);
     clr->r=r; clr->g=g; clr->b=b; clr->a=255;
@@ -133,8 +139,10 @@ Color *parseColorFromHex(char *hex) {
 bool parseBoolValue(char *value) {
   char *valueLower = strdup(strlwr(value));
   if (strcmp(valueLower, "false") == 0) {
+    free(valueLower);
     return false;
   } else {
+    free(valueLower);
     return true;
   }
 }
@@ -186,6 +194,9 @@ BVGRectangle *BVGParseRectangle(char *argv[7]) {
   result->color=*clr;
   result->fill=fill;
   result->lineThickness=thickness;
+
+  free(clr);
+  free(rectangle);
   return result;
 }
 
@@ -237,6 +248,8 @@ BVGCircle *BVGParseCircle(char *argv[4]) {
   result->centerY=y;
   result->color=*clr;
   result->radius=radius;
+  
+  free(clr);
   return result;
 }
 
@@ -268,6 +281,8 @@ BVGCircle *BVGParseCircleSegment(char *argv[7]) {
   result->segments=segments;
   result->startAngle=startAngle;
   result->endAngle=endAngle;
+  
+  free(clr);
   return result;
 }
 
@@ -295,6 +310,8 @@ BVGRing *BVGParseRing(char *argv[8]) {
   result->startAngle=startAngle; result->endAngle=endAngle;
   result->segmets=segments;
   result->color=*clr;
+  
+  free(clr);
   return result;
 }
 
@@ -323,6 +340,8 @@ BVGTriangle *BVGParseTriangle(char *argv[8]) {
   result->corner3 = (Vector2){x3, y3};
   result->fill = fill;
   result->color = *clr;
+
+  free(clr);
   return result;
 }
 
@@ -349,6 +368,8 @@ BVGText *BVGParseText(char *argv[5]) {
   result->text=text; result->x=x;
   result->y=y; result->fontSize=size;
   result->color=*clr;
+
+  free(clr);
   return result;
 }
 
@@ -367,51 +388,52 @@ void matchFunctionCall(char *call) {
     char *argv[7];
     call = call+strlen("rectangle (");
     collectArgs(argv, call, 7);
-    BVGRectangle *rect = malloc(sizeof(BVGRectangle)); 
-    rect = BVGParseRectangle(argv);
-    BVGDrawRectangle(rect);
+    BVGRectangle *shape = BVGParseRectangle(argv);
+    BVGDrawRectangle(shape);
+    free(shape);
   } else if (strcmp(function, "roundedrectangle") == 0) {
     char *argv[9];
     call = call+strlen("roundedrectangle (");
     collectArgs(argv, call, 9);
-    BVGRoundedRectangle *roundrect = malloc(sizeof(BVGRoundedRectangle));
-    roundrect = BVGParseRoundedRectangle(argv);
-    BVGDrawRoundedRectangle(roundrect);
+    BVGRoundedRectangle *shape = BVGParseRoundedRectangle(argv);
+    BVGDrawRoundedRectangle(shape);
+    free(shape);
   } else if (strcmp(function, "circle") == 0) {
     char *argv[4];
     call = call+strlen("circle (");
     collectArgs(argv, call, 4);
-    BVGCircle *circle = malloc(sizeof(BVGCircle));
-    circle = BVGParseCircle(argv);
-    BVGDrawCircle(circle);
+    BVGCircle *shape = BVGParseCircle(argv);
+    BVGDrawCircle(shape);
+    free(shape);
   } else if (strcmp(function, "circlesegment") == 0) {
     char *argv[7];
     call = call+strlen("circlesegment (");
     collectArgs(argv, call, 7);
-    BVGCircle *circle = malloc(sizeof(BVGCircle));
-    circle = BVGParseCircleSegment(argv);
-    BVGDrawCircle(circle);
+    BVGCircle *shape = BVGParseCircleSegment(argv);
+    BVGDrawCircle(shape);
+    free(shape);
   } else if (strcmp(function, "ring") == 0) {
     char *argv[8];
     call = call+strlen("ring (");
     collectArgs(argv, call, 8);
-    BVGRing *ring = malloc(sizeof(BVGRing));
-    ring = BVGParseRing(argv);
-    BVGDrawRing(ring);
+    BVGRing *shape = BVGParseRing(argv);
+    BVGDrawRing(shape);
+    free(shape);
   } else if (strcmp(function, "triangle") == 0) {
     char *argv[8];
     call = call+strlen("triangle (");
     collectArgs(argv, call, 8);
-    BVGTriangle *triangle = malloc(sizeof(BVGTriangle));
-    triangle = BVGParseTriangle(argv);
-    BVGDrawTriangle(triangle);
+    BVGTriangle *shape = BVGParseTriangle(argv);
+    BVGDrawTriangle(shape);
+    free(shape);
   } else if (strcmp(function, "text") == 0) {
     char *argv[5];
     call = call+strlen("text (");
     collectArgs(argv, call, 5);
-    BVGText *text = malloc(sizeof(BVGText));
-    text = BVGParseText(argv);
-    BVGDrawText(text);
+    BVGText *shape =  BVGParseText(argv);
+    BVGDrawText(shape);
+    free(shape);
   }
+  free(function);
   return;
 }

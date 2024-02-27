@@ -6,16 +6,17 @@
 #include <stdlib.h>
 #include <unistd.h>
 
-int main(void) {
-  FILE *bvgfile = readFile("./test.bvg");
+int getFuncs(char *file, char ***ret) {
+  FILE *bvgfile = readFile(file);
   char *line = NULL;
   size_t len = 0;
   ssize_t nread = 0;
   ssize_t totallinesize = 0;
   ssize_t funcCount = 0;
   int inComment = 0;
+  int newFuncsMem = sizeof(char)*1;
   char *funcline = strdup("");
-  char **funcs = malloc(1*sizeof(char));
+  char **funcs = malloc(sizeof(char)*1);
   
   while ((nread = getline(&line, &len, bvgfile)) != -1) {
     if (strstr(line, "/*")) {
@@ -35,28 +36,41 @@ int main(void) {
       exit(2);
     totallinesize=totallinesize+nread;
     sprintf(funcline, "%s%s", funcline, line);
-    if (line[nread-2] == ')') {
+    if (line[nread-2] == ')' || line[nread-1] == ')') {
       funcCount += 1;
-      void *newfuncs = realloc(funcs, sizeof(char)*(sizeof(funcs)+1+strlen(funcline)*2));
+      newFuncsMem = sizeof(char)*(sizeof(funcs)+sizeof(funcline));
+      void *newfuncs = realloc(funcs, newFuncsMem);
       if (newfuncs)
 	funcs = newfuncs;
       else
 	exit(2);
-      funcs[funcCount-1]=strdup(funcline);
+      funcs[funcCount-1]=strdup(funcline); // TODO: figure out memleak
       totallinesize = 0;
       free(funcline);
       funcline = strdup("");
     }
   }
+  free(funcline);
   free(line);
-
-  for (int i = 0; i<funcCount; i++) {
-    printf("%s", funcs[i]);
-  }
-
   fclose(bvgfile);
 
-  char *call = strdup(multiToSingle(funcs[0]));
+  //char **alloc = realloc(*ret, newFuncsMem);
+  //if (alloc)
+    *ret = funcs;
+    //else
+    //   exit(2);
+    // free(alloc);
+  //memcpy(*ret, funcs, newFuncsMem);
+  //free(funcs);
+  return funcCount;  
+}
+
+int main(int argc, char **argv) {
+
+  char **funcs;
+  int funcCount = getFuncs(argv[1], &funcs);
+
+  char *call = multiToSingle(funcs[0]);
   char *args[2];
   call=call+strlen("IMG (");
   char *callTrim = trim(call);
@@ -66,23 +80,33 @@ int main(void) {
 
   InitWindow (imgsize->width, imgsize->height, ":3");
 
+  free(imgsize);
+  free(call-strlen("IMG ("));
+  free(callTrim);
+  free(funcs);
 
   while (!WindowShouldClose ()) {
-    
+    char **funcs;
+    int funcCount = getFuncs(argv[1], &funcs);
     BeginDrawing ();
     ClearBackground (RAYWHITE);
 
-    for (int i = 0; i<funcCount; i++) {
-      matchFunctionCall(multiToSingle(funcs[i]));
+    // i = 1 since the first item is always IMG
+    for (int i = 1; i<funcCount; i++) {
+      char *single = multiToSingle(funcs[i]);
+      matchFunctionCall(single);
+      free(single);
     }
 
     char *text = malloc(strlen("100")*100);
     sprintf(text, "%d", GetFPS());
     DrawText(text, 2, 2, 20, MAROON);
+    free(text);
     EndDrawing ();
+    free(funcs);
   }
 
   CloseWindow ();
-  
+   
   return 0;
 }

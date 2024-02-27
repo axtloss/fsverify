@@ -27,7 +27,6 @@ char *trim(char *s)
   end = result + strlen(result) - 1;
   while(end > result && isspace((unsigned char)*end)) end--;
 
-  // Write new null terminator character
   end[1] = '\0';
 
   return result;
