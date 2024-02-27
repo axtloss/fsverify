@@ -314,6 +314,8 @@ BVGRing *BVGParseRing(char *argv[8]) {
   args[7] = args[7]+2;
   args[7][strlen(args[7])-1] = '\0';
   clr = parseColorFromHex(args[7]);
+  printf("X: %d, Y: %d\n", x, y);
+  printf("startAng: %f, endAng: %f\n", startAngle, endAngle);
   result->centerX=x; result->centerY=y;
   result->inRadius=innerRadius; result->outRadius=outerRadius;
   result->startAngle=startAngle; result->endAngle=endAngle;

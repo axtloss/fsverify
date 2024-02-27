@@ -44,7 +44,7 @@ int getFuncs(char *file, char ***ret) {
 	funcs = newfuncs;
       else
 	exit(2);
-      funcs[funcCount-1]=strdup(funcline); // TODO: figure out memleak
+      funcs[funcCount-1]=strdup(funcline);
       totallinesize = 0;
       free(funcline);
       funcline = strdup("");
@@ -54,7 +54,8 @@ int getFuncs(char *file, char ***ret) {
   free(line);
   fclose(bvgfile);
 
-  *ret = funcs;
+
+  *ret = funcs;  
   return funcCount;  
 }
 
@@ -89,6 +90,7 @@ int main(int argc, char **argv) {
       char *single = multiToSingle(funcs[i]);
       matchFunctionCall(single);
       free(single);
+      free(funcs[i]);
     }
 
     char *text = malloc(strlen("100")*100);
