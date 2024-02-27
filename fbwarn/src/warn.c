@@ -77,11 +77,14 @@ int main(int argc, char **argv) {
   free(imgsize);
   free(call-strlen("IMG ("));
   free(callTrim);
+  for (int i = 0; i<funcCount; i++)
+    free(funcs[i]);
   free(funcs);
 
   while (!WindowShouldClose ()) {
     char **funcs;
     int funcCount = getFuncs(argv[1], &funcs);
+    free(funcs[0]); // Dont need you
     BeginDrawing ();
     ClearBackground (RAYWHITE);
 
