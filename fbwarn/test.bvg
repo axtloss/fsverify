@@ -1,0 +1,28 @@
+// Single line comments are started with //
+
+/*
+A multiline comment can be
+done in this fashion
+basically like C
+*/
+
+
+// The IMG function is always required
+// it initializes the image with its size
+IMG (width=800, height=600)
+
+rectangle (x=0,y=0,width=800,height=100,fill=true,color="#E40303FF",thickness=1.0)
+rectangle (x=0,y=100,width=800,height=100,fill=true,color="#FF8C00FF",thickness=1.0)
+rectangle (x=0,y=200,width=800,height=100,fill=true,color="#FFED00FF",thickness=1.0)
+rectangle (x=0,y=300,width=800,height=100,fill=true,color="#008026FF",thickness=1.0)
+rectangle (x=0,y=400,width=800,height=100,fill=true,color="#24408EFF",thickness=1.0)
+rectangle (x=0,y=500,width=800,height=100,fill=true,color="#732982FF",thickness=1.0)
+
+triangle (x1=100,y1=0,x2=100,y2=600,x3=400,y3=300,fill=true,color="#000000FF")
+rectangle (x=50,y=0,width=50,height=600,fill=true,color="#000000FF")
+triangle (x1=50,y1=0,x2=50,y2=600,x3=350,y3=300,fill=true,color="#613915FF")
+rectangle (x=0,y=0,width=50,height=600,fill=true,color="#613915FF")
+triangle (x1=0,y1=0,x2=0,y2=600,x3=300,y3=300,fill=true,color="#74D7EEFF")
+triangle (x1=0,y1=50,x2=0,y2=550,x3=250,y3=300,fill=true,color="#FFAFC8FF")
+triangle (x1=0,y1=100,x2=0,y2=500,x3=200,y3=300,fill=true,color="#FFFFFFFF")
+

@@ -1,6 +1,11 @@
 #include <raylib.h>
 #include <stdbool.h>
 
+typedef struct BVGIMG {
+  int width;
+  int height;
+} BVGIMG;
+
 typedef struct BVGRectangle {
   Rectangle rayrectangle;
   bool fill;

@@ -13,6 +13,7 @@ Color *parseColorFromHex(char *hex);
 bool parseBoolValue(char *hex);
 
 // Shape functions
+BVGIMG *BVGParseIMG(char *argv[2]);
 BVGRectangle *BVGParseRectangle(char *argv[7]);
 void BVGDrawRectangle(BVGRectangle *rectangle);
 BVGRoundedRectangle *BVGParseRoundedRectangle(char *argv[9]);
