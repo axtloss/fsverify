@@ -40,6 +40,15 @@ void BVGDrawRing(BVGRing *ring) {
   DrawRing(center, ring->inRadius, ring->outRadius, ring->startAngle, ring->endAngle, ring->segmets, ring->color);
 }
 
+void BVGDrawEllipse(BVGEllipse *ellipse) {
+  if (ellipse->fill) {
+    DrawEllipse(ellipse->centerX, ellipse->centerY, ellipse->horizontalRadius, ellipse->verticalRadius, ellipse->color);
+  } else {
+    DrawEllipseLines(ellipse->centerX, ellipse->centerY, ellipse->horizontalRadius, ellipse->verticalRadius, ellipse->color);
+  }
+  return;
+}
+
 void BVGDrawTriangle(BVGTriangle *triangle) {
   if (triangle->fill) {
     DrawTriangle(triangle->corner1, triangle->corner2, triangle->corner3, triangle->color);
@@ -315,6 +324,37 @@ BVGRing *BVGParseRing(char *argv[8]) {
   return result;
 }
 
+BVGEllipse *BVGParseEllipse(char *argv[6]) {
+  BVGEllipse *result = malloc(sizeof(BVGEllipse));
+  size_t argN = 6;
+  char *args[argN];
+  char *knownArgs[6] = {"x", "y", "horizontalradius", "verticalradius", "fill", "color"};
+  orderArgs(args, argv, argN, knownArgs);
+  int x, y;
+  float horizontalRadius, verticalRadius;
+  bool fill;
+  Color *clr;
+  sscanf(args[0], "%d", &x);
+  sscanf(args[1], "%d", &y);
+  sscanf(args[2], "%f", &horizontalRadius);
+  sscanf(args[3], "%f", &verticalRadius);
+  fill = parseBoolValue(args[4]);
+  args[5] = args[5]+2;
+  args[5][strlen(args[5])-1] = '\0';
+  clr = parseColorFromHex(args[5]);
+  printf("X: %d, Y: %d", x, y);
+  printf("hRad: %f, vRad: %f", horizontalRadius, verticalRadius);
+  printf("fill: %d, Color: %s", fill, args[5]);
+  result->centerX=x; result->centerY=y;
+  result->horizontalRadius=horizontalRadius;
+  result->verticalRadius=verticalRadius;
+  result->fill=fill;
+  result->color=*clr;
+
+  free(clr);
+  return result;
+}  
+
 BVGTriangle *BVGParseTriangle(char *argv[8]) {
   BVGTriangle *result = malloc(sizeof(BVGTriangle));
   size_t argN = 8;
@@ -418,6 +458,13 @@ void matchFunctionCall(char *call) {
     collectArgs(argv, call, 8);
     BVGRing *shape = BVGParseRing(argv);
     BVGDrawRing(shape);
+    free(shape);
+  } else if (strcmp(function, "ellipse") == 0) {
+    char *argv[6];
+    call = call+strlen("ellipse (");
+    collectArgs(argv, call, 6);
+    BVGEllipse *shape = BVGParseEllipse(argv);
+    BVGDrawEllipse(shape);
     free(shape);
   } else if (strcmp(function, "triangle") == 0) {
     char *argv[8];

@@ -38,7 +38,7 @@ int getFuncs(char *file, char ***ret) {
     sprintf(funcline, "%s%s", funcline, line);
     if (line[nread-2] == ')' || line[nread-1] == ')') {
       funcCount += 1;
-      newFuncsMem = sizeof(char)*(sizeof(funcs)+sizeof(funcline));
+      newFuncsMem = sizeof(char)*(sizeof(funcs)+sizeof(funcline)*funcCount);
       void *newfuncs = realloc(funcs, newFuncsMem);
       if (newfuncs)
 	funcs = newfuncs;
@@ -54,14 +54,7 @@ int getFuncs(char *file, char ***ret) {
   free(line);
   fclose(bvgfile);
 
-  //char **alloc = realloc(*ret, newFuncsMem);
-  //if (alloc)
-    *ret = funcs;
-    //else
-    //   exit(2);
-    // free(alloc);
-  //memcpy(*ret, funcs, newFuncsMem);
-  //free(funcs);
+  *ret = funcs;
   return funcCount;  
 }
 
