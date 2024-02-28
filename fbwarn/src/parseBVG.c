@@ -7,6 +7,8 @@
 #include "raylib.h"
 #include "extString.h"
 
+float scale;
+
 void BVGDrawRectangle(BVGRectangle *rectangle) {
   if (rectangle->fill) {
     DrawRectangleRec(rectangle->rayrectangle, rectangle->color);
@@ -178,31 +180,28 @@ BVGRectangle *BVGParseRectangle(char *argv[7]) {
   size_t argN = 7;
   char *args[argN];
   char *knownArgs[7] = {"x", "y", "width", "height", "color", "fill", "thickness"};
-  orderArgs(args, argv, argN, knownArgs);
-  printf("119 Parsing...%s \n", args[0]);
   int x, y, width, height, r, g, b, a;
   float thickness = 1.0;
   bool fill = true;
+  Color *clr;
+  
+  orderArgs(args, argv, argN, knownArgs);
   sscanf(args[0], "%d", &x);
   sscanf(args[1], "%d", &y);
   sscanf(args[2], "%d", &width);
   sscanf(args[3], "%d", &height);
   args[4] = args[4]+2;
   args[4][strlen(args[4])-1] = '\0';
-  Color *clr = parseColorFromHex(args[4]);
+  clr = parseColorFromHex(args[4]);
   sscanf(args[6], "%fd", &thickness);
   fill = parseBoolValue(args[5]);
-  printf("X: %d, Y: %d\n", x, y);
-  printf("Width: %d, Height: %d\n", width, height);
-  printf("Color: %d, %d, %d\n", r, g, b);
-  printf("Fill: %d, Thickness: %f\n", fill, thickness);
-
-  rectangle->x=x; rectangle->y=y;
-  rectangle->height=height; rectangle->width=width;
+ 
+  rectangle->x=x*scale; rectangle->y=y*scale;
+  rectangle->height=height*scale; rectangle->width=width*scale;
   result->rayrectangle=*rectangle;
   result->color=*clr;
   result->fill=fill;
-  result->lineThickness=thickness;
+  result->lineThickness=thickness*scale;
 
   free(clr);
   free(rectangle);
@@ -219,12 +218,12 @@ BVGRoundedRectangle *BVGParseRoundedRectangle(char *argv[9]) {
   size_t argN = 9;
   char *args[argN];
   char *knownArgs[9] = {"x", "y", "width", "height", "color", "fill", "thickness", "roundness", "segments"};
+  float roundness;
+  int segments;
+  
   orderArgs(args, argv, argN, knownArgs);
   bvgrectangle = BVGParseRectangle(argv);
   result->rectangle = *bvgrectangle;
-
-  float roundness;
-  int segments;
   sscanf(args[7], "%fd", &roundness);
   sscanf(args[8], "%d", &segments);
 
@@ -240,23 +239,23 @@ BVGCircle *BVGParseCircle(char *argv[4]) {
   size_t argN = 4;
   char *args[argN];
   char *knownArgs[4] = {"x", "y", "radius", "color"};
-  orderArgs(args, argv, argN, knownArgs);
   int x, y;
   float radius;
   Color *clr;
+  
+  orderArgs(args, argv, argN, knownArgs);
   sscanf(args[0], "%d", &x);
   sscanf(args[1], "%d", &y);
   sscanf(args[2], "%fd", &radius);
   args[3] = args[3]+2;
   args[3][strlen(args[3])-1] = '\0';
   clr = parseColorFromHex(args[3]);
-  printf("X: %d, Y: %d\n", x, y);
-  printf("radius: %f, color: %s\n", radius, args[3]);
+
   result->drawSector=false;
-  result->centerX=x;
-  result->centerY=y;
+  result->centerX=x*scale;
+  result->centerY=y*scale;
+  result->radius=radius*scale;
   result->color=*clr;
-  result->radius=radius;
   
   free(clr);
   return result;
@@ -267,10 +266,11 @@ BVGCircle *BVGParseCircleSegment(char *argv[7]) {
   size_t argN = 7;
   char *args[argN];
   char *knownArgs[7] = {"x", "y", "radius", "color", "startangle", "endangle", "segments"};
-  orderArgs(args, argv, argN, knownArgs);
   int x, y, segments;
   float radius, startAngle, endAngle;
   Color *clr;
+  
+  orderArgs(args, argv, argN, knownArgs);
   sscanf(args[0], "%d", &x);
   sscanf(args[1], "%d", &y);
   sscanf(args[2], "%fd", &radius);
@@ -280,16 +280,13 @@ BVGCircle *BVGParseCircleSegment(char *argv[7]) {
   args[3] = args[3]+2;
   args[3][strlen(args[3])-1] = '\0';
   clr = parseColorFromHex(args[3]);
-  printf("X: %d, Y: %d\n", x, y);
-  printf("radius: %f, color: %s\n", radius, args[3]);
+
   result->drawSector=true;
-  result->centerX=x;
-  result->centerY=y;
+  result->centerX=x; result->centerY=y*scale;
   result->color=*clr;
-  result->radius=radius;
+  result->radius=radius*scale;
   result->segments=segments;
-  result->startAngle=startAngle;
-  result->endAngle=endAngle;
+  result->startAngle=startAngle; result->endAngle=endAngle;
   
   free(clr);
   return result;
@@ -300,10 +297,11 @@ BVGRing *BVGParseRing(char *argv[8]) {
   size_t argN = 8;
   char *args[argN];
   char *knownArgs[8] = {"x", "y", "innerradius", "outerradius", "startangle", "endangle", "segments", "color"};
-  orderArgs(args, argv, argN, knownArgs);
   int x, y, segments;
   float innerRadius, outerRadius, startAngle, endAngle;
   Color *clr;
+  
+  orderArgs(args, argv, argN, knownArgs);
   sscanf(args[0], "%d", &x);
   sscanf(args[1], "%d", &y);
   sscanf(args[2], "%f", &innerRadius);
@@ -314,9 +312,8 @@ BVGRing *BVGParseRing(char *argv[8]) {
   args[7] = args[7]+2;
   args[7][strlen(args[7])-1] = '\0';
   clr = parseColorFromHex(args[7]);
-  printf("X: %d, Y: %d\n", x, y);
-  printf("startAng: %f, endAng: %f\n", startAngle, endAngle);
-  result->centerX=x; result->centerY=y;
+  
+  result->centerX=x*scale; result->centerY=y*scale;
   result->inRadius=innerRadius; result->outRadius=outerRadius;
   result->startAngle=startAngle; result->endAngle=endAngle;
   result->segmets=segments;
@@ -344,12 +341,10 @@ BVGEllipse *BVGParseEllipse(char *argv[6]) {
   args[5] = args[5]+2;
   args[5][strlen(args[5])-1] = '\0';
   clr = parseColorFromHex(args[5]);
-  printf("X: %d, Y: %d", x, y);
-  printf("hRad: %f, vRad: %f", horizontalRadius, verticalRadius);
-  printf("fill: %d, Color: %s", fill, args[5]);
+  
   result->centerX=x; result->centerY=y;
-  result->horizontalRadius=horizontalRadius;
-  result->verticalRadius=verticalRadius;
+  result->horizontalRadius=horizontalRadius*scale;
+  result->verticalRadius=verticalRadius*scale;
   result->fill=fill;
   result->color=*clr;
 
@@ -362,11 +357,12 @@ BVGTriangle *BVGParseTriangle(char *argv[8]) {
   size_t argN = 8;
   char *args[argN];
   char *knownArgs[8] = {"x1", "y1", "x2", "y2", "x3", "y3", "fill", "color"};
-  orderArgs(args, argv, argN, knownArgs);
   int x1, x2, x3;
   int y1, y2, y3;
   bool fill;
   Color *clr;
+  
+  orderArgs(args, argv, argN, knownArgs);
   sscanf(args[0], "%d", &x1);
   sscanf(args[1], "%d", &y1);
   sscanf(args[2], "%d", &x2);
@@ -377,9 +373,10 @@ BVGTriangle *BVGParseTriangle(char *argv[8]) {
   args[7] = args[7]+2;
   args[7][strlen(args[7])-1] = '\0';
   clr = parseColorFromHex(args[7]);
-  result->corner1 = (Vector2){x1, y1};
-  result->corner2 = (Vector2){x2, y2};
-  result->corner3 = (Vector2){x3, y3};
+  
+  result->corner1 = (Vector2){x1*scale, y1*scale};
+  result->corner2 = (Vector2){x2*scale, y2*scale};
+  result->corner3 = (Vector2){x3*scale, y3*scale};
   result->fill = fill;
   result->color = *clr;
 
@@ -392,23 +389,22 @@ BVGText *BVGParseText(char *argv[5]) {
   size_t argN = 5;
   char *args[argN];
   char *knownArgs[5] = {"text", "x", "y", "size", "color"};
-  orderArgs(args, argv, argN, knownArgs);
-  args[0] = args[0]+1;
-  args[0][strlen(args[0])-1] = '\0';
   char *text = args[0];
   int x, y, size;
   Color *clr;
+  
+  orderArgs(args, argv, argN, knownArgs);
+  args[0] = args[0]+1;
+  args[0][strlen(args[0])-1] = '\0';
   sscanf(args[1], "%d", &x);
   sscanf(args[2], "%d", &y);
   sscanf(args[3], "%d", &size);
   args[4] = args[4]+2;
   args[4][strlen(args[4])-1] = '\0';
-  printf("Text: %s\n", text);
-  printf("X: %d, Y: %d\n", x, y);
-  printf("Size: %d, Color: %s\n", size, args[4]);
   clr = parseColorFromHex(args[4]);
-  result->text=text; result->x=x;
-  result->y=y; result->fontSize=size;
+  
+  result->text=text; result->fontSize=size;
+  result->x=x*scale; result->y=y*scale; 
   result->color=*clr;
 
   free(clr);
@@ -418,13 +414,12 @@ BVGText *BVGParseText(char *argv[5]) {
 /*
   Takes a BVG function call and calls the according C function
 */
-void matchFunctionCall(char *call) {
-  printf("Matching %s\n", call);
+void matchFunctionCall(char *call, float locScale) {
+  scale = locScale;
   char *funcCall = strdup(call);
   char *funcName = strsep(&funcCall, "(");
   char *function = trim(strlwr(funcName));
   free(funcName);
-  printf("Got function %s\n", function);
   call[strlen(call)-1]='\0';
   if (strcmp(function, "rectangle") == 0) {
     char *argv[7];

@@ -6,7 +6,7 @@
 
 FILE *readFile(char *path);
 char *multiToSingle(char *s);
-void matchFunctionCall(char *call);
+void matchFunctionCall(char *call, float locScale);
 void collectArgs(char *res[], char *call, int n);
 void orderArgs(char *res[], char *argv[], int n, char *knownArgs[]);
 Color *parseColorFromHex(char *hex);

@@ -61,6 +61,14 @@ int getFuncs(char *file, char ***ret) {
 
 int main(int argc, char **argv) {
 
+  if (argc < 3) {
+    printf("USAGE: %s <bvg file> <scale>\n", argv[0]);
+    exit(1);
+  }
+  
+  float scale;
+  sscanf(argv[2], "%f", &scale);
+  
   char **funcs;
   int funcCount = getFuncs(argv[1], &funcs);
 
@@ -72,7 +80,7 @@ int main(int argc, char **argv) {
   collectArgs(args, callTrim, 2);
   BVGIMG *imgsize = BVGParseIMG(args);
 
-  InitWindow (imgsize->width, imgsize->height, ":3");
+  InitWindow (imgsize->width*scale, imgsize->height*scale, ":3");
 
   free(imgsize);
   free(call-strlen("IMG ("));
@@ -91,7 +99,7 @@ int main(int argc, char **argv) {
     // i = 1 since the first item is always IMG
     for (int i = 1; i<funcCount; i++) {
       char *single = multiToSingle(funcs[i]);
-      matchFunctionCall(single);
+      matchFunctionCall(single, scale);
       free(single);
       free(funcs[i]);
     }
