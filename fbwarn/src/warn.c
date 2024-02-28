@@ -80,7 +80,7 @@ int main(int argc, char **argv) {
   collectArgs(args, callTrim, 2);
   BVGIMG *imgsize = BVGParseIMG(args);
 
-  InitWindow (imgsize->width*scale, imgsize->height*scale, ":3");
+  InitWindow (imgsize->width*scale, imgsize->height*scale, argv[1]);
 
   free(imgsize);
   free(call-strlen("IMG ("));
