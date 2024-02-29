@@ -1,0 +1,32 @@
+\subsection{verifysetup}
+Nachdem fsverify vollständig implementiert war und alle Speicherkonzepte vollständig Entwickelt sind, braucht fsverify auch ein Programm um alles richtig aufzusetzen.\\
+Das Programm muss eine Datenbank von Nodes anhand der zu verifizierenden Partition erstellen, den Header entsprechend Konfigurieren und alles auf eine Datei schreiben, die der Nutzer (oder eher Distribution Entwickler) auf die für fsverify vorgesehene Partition schreiben kann.
+
+\subsubsection{Optimierung}
+Genauso wie fsverify, benutzt verifysetup erstmal nur einen Thread um die Datenbank zu erstellen. Dies führte zu einer laufzeit von über 2 Stunden für 1gb.\\
+Die schritte zur optimierung sind die gleichen wie bei fsverify. Jedoch verbesserte sich die Laufzeit um einiges bereits bei dem wechsel zu 2kb Blocks und sha1 hashing, von 2 Stunden zu einer Stunde.\\
+Mit dem wechsel zu multithreading ging dies dann runter zu 19 Sekunden mit 12 Threads.
+\\
+Die Laufzeit von verifysetup verbesserte sich um 33846\% in einer Woche.
+\begin{verbatim}
+10.02.2024: fsverify setup takes 110minutes to complete for 1gb
+optimizations: none
+
+12.02.2024: fsverify setup takes 71minutes to complete for 1gb
+optimizations: block size 2k, sha1 instead of sha256
+
+12.02.2024: fsverify setup takes ~9.54 seconds to complete for 1gb with 12 threads
+optimizations: block size 2k, sha1 instead of sha256,
+               multithreaded, db batch operations
+
+17.02.2024: fsverify setup takes ~19.50 seconds to complete for 1gb with 12 threads
+optimizations: block size 2k, sha1 instead of sha256,
+               multithreaded, db batch operations
+unoptimizations: enable database signing, header generation,
+                 fsverify partition generation
+\end{verbatim}
+%%% Local Variables:
+%%% mode: LaTeX
+%%% TeX-master: "../fsverify"
+%%% End:
+
