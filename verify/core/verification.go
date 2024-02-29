@@ -8,7 +8,7 @@ import (
 	"strings"
 
 	"aead.dev/minisign"
-	"github.com/axtloss/fsverify/config"
+	"github.com/axtloss/fsverify/verify/config"
 	"github.com/tarm/serial"
 )
 

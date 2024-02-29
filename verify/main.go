@@ -1,7 +1,7 @@
 package main
 
 import (
-	"github.com/axtloss/fsverify/cmd"
+	"github.com/axtloss/fsverify/verify/cmd"
 )
 
 var (

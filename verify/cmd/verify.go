@@ -7,8 +7,8 @@ import (
 	"os"
 	"sync"
 
-	"github.com/axtloss/fsverify/config"
-	"github.com/axtloss/fsverify/core"
+	"github.com/axtloss/fsverify/verify/config"
+	"github.com/axtloss/fsverify/verify/core"
 	"github.com/spf13/cobra"
 )
 
@@ -166,6 +166,7 @@ func ValidateCommand(_ *cobra.Command, args []string) error {
 
 	for err := range errChan {
 		if err != nil {
+			WarnUser()
 			return err
 		}
 	}
