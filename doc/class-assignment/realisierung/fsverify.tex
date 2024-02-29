@@ -1,0 +1,32 @@
+\subsection{fsverify}
+Da das Konzept der Festplattenverifizierung nichts neues ist, habe ich mir erstmals bereits existierende Projekte angeschaut, um zu sehen, wie es in anderen Betriebssystemen realisiert ist.
+Hierbei war google's dm-verity, welches in Android und ChromeOS geräten genutzt wird, die beste Hilfe, da es am besten dokumentiert und ausgetestet ist.
+
+\subsubsection{Partitionslayout}
+Inspiriert an dm-verity, entschied ich mich dafür, die Datenbank auf eine eigene Partition zu speichern, also war das erste Ziel ein gutes Partitionslayout zu Entwickeln, in der die Datenbank und Metadata so gut wie möglich gespiechert werden kann.
+\\
+Die erste Version des Layouts war recht simpel, es hatte alles was wirklich wichtig war, eine magic number, die signatur, größe des Dateisystems und größe der Datenbank:
+\begin{verbatim}
+<magic number> <signature> <filesystem size> <table size>
+\end{verbatim}
+
+\begin{center}
+  \begin{tabular}{|c | c | c | c|}
+    \hline
+    Feld & Größe & Nutzen & Wert \\ [0.5ex]
+    \hline
+    magic number & 2 bytes & Sanity check & 0xACAB \\
+    \hline
+    signature & 302 bytes & minisign signatur & - \\
+    \hline
+    filesystem size & 4 bytes & größe des originalen Dateisystems in GB & - \\
+    \hline
+    table size & 4 bytes & größe der Datenbank in MB & - \\
+    \hline
+  \end{tabular}
+\end{center}
+
+%%% Local Variables:
+%%% mode: LaTeX
+%%% TeX-master: "../fsverify"
+%%% End:
