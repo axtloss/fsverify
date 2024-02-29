@@ -1,20 +1,21 @@
 package cmd
 
 import (
-	"aead.dev/minisign"
 	"bytes"
 	"crypto/ed25519"
 	"encoding/base64"
 	"encoding/binary"
 	"fmt"
-	verify "github.com/axtloss/fsverify/core"
-	"github.com/axtloss/fsverify/verifysetup/core"
-	"github.com/spf13/cobra"
-	bolt "go.etcd.io/bbolt"
 	"math"
 	"os"
 	"strconv"
 	"sync"
+
+	"aead.dev/minisign"
+	verify "github.com/axtloss/fsverify/verify/core"
+	"github.com/axtloss/fsverify/verifysetup/core"
+	"github.com/spf13/cobra"
+	bolt "go.etcd.io/bbolt"
 )
 
 func NewSetupCommand() *cobra.Command {

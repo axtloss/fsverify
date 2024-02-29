@@ -6,7 +6,7 @@ import (
 	"encoding/json"
 	"fmt"
 
-	verify "github.com/axtloss/fsverify/core"
+	verify "github.com/axtloss/fsverify/verify/core"
 	bolt "go.etcd.io/bbolt"
 )
 

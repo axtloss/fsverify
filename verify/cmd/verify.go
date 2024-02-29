@@ -88,6 +88,7 @@ func ValidateCommand(_ *cobra.Command, args []string) error {
 	if len(args) != 1 {
 		return fmt.Errorf("Usage: fsverify verify [disk]")
 	}
+
 	header, err := core.ReadHeader(config.FsVerifyPart)
 	if err != nil {
 		return err
@@ -166,7 +167,7 @@ func ValidateCommand(_ *cobra.Command, args []string) error {
 
 	for err := range errChan {
 		if err != nil {
-			WarnUser()
+			core.WarnUser()
 			return err
 		}
 	}

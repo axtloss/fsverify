@@ -4,7 +4,7 @@ go 1.21.6
 
 require (
 	aead.dev/minisign v0.2.1 // indirect
-	github.com/axtloss/fsverify v0.0.0-20240217210050-61cc5e9a02a3 // indirect
+	github.com/axtloss/fsverify/verify v0.0.0-20240217210050-61cc5e9a02a3 // indirect
 	github.com/inconshreveable/mousetrap v1.1.0 // indirect
 	github.com/jedisct1/go-minisign v0.0.0-20230811132847-661be99b8267 // indirect
 	github.com/spf13/cobra v1.8.0 // indirect
@@ -16,4 +16,4 @@ require (
 	golang.org/x/term v0.16.0 // indirect
 )
 
-replace github.com/axtloss/fsverify => ../verify/
+replace github.com/axtloss/fsverify/verify => ../verify/

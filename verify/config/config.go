@@ -13,3 +13,6 @@ var ProcCount = 12
 
 // Which partition/file to use as the fsverify partition
 var FsVerifyPart = "./verifysetup/part.fsverify"
+
+var FbWarnLoc = "/fsverify/bin/fbwarn"
+var BVGLoc = "/fsverify/share/warn.bvg"

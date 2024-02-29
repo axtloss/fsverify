@@ -73,6 +73,7 @@ sed 's|BVGLOCATION|"/fsverify/share/warn.bvg"|g' ./verifyConfig.go.tmp > verify/
 echo "Building fsverify"
 cd verify
 go build -a -tags netgo -ldflags '-w -extldflags "-static"' -o ../fsverify_root/bin/fsverify
+gcc getScreensize.c -o ../fsverify_root/bin/getscreensize
 cd ..
 
 echo "Building verifysetup"
