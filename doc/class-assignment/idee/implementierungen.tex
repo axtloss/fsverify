@@ -1,17 +1,14 @@
 \subsection{Implementierungen}
 Für die Verifizierung eines Dateisystems gibt es verschiedene Methoden:
-\begin{itemize}
-\item Per-Datei verifizierung\\
+\begin{description}
+\item[Per-Datei verifizierung]
   Bei der Per-Datei Verifizierung wird der Hash von jeder Datei die verifiziert werden soll mit einem vorbestimmten, vertrauten, Hash verglichen, falls der Hash übereinstimmt ist Datei unmodifiziert, wenn sie jedoch abweichen, ist die Datei modifiziert und kann nicht vertraut werden.
-\item Festplattenverifizierung\\
+\item[Festplattenverifizierung]
   Hier wird ein Hash von der ganzen Festplatte oder Partition mit einem vorgegebenen Wert verglichen. Im vergleich zu der Per-Datei verifizierung werden hier auch neue Dateien erkannt, welche eine Per-Datei verifizierung ignoriert hätte. Jedoch kann dies auch erheblich langsamer sein, da die ganze Partition, welche sehr groß werden kann, in einem Thread gehasht wird.
-\item Blockverifizierung\\
+\item[Blockverifizierung]
   Dies ist ähnlich zu der Festplattenverifizierung, jedoch werden hier nur einzelne Blöcke gehasht und verifiziert, dies ermöglicht es, die Verifizierung durch Multithreading zu beschleunigen, während man weiterhin die ganze Festplatte/Partition verifiziert.
-\end{itemize}
-\\
+\end{description}
 Alle drei arten der Verifizierung haben eine Sache gemeinsam, sie brauchen eine vertraute quelle von der sie den korrekten Hash für eine Datei/Partition/Block lesen können.
-
-
 %%% Local Variables:
 %%% mode: LaTeX
 %%% TeX-master: "../fsverify.tex"

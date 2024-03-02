@@ -389,7 +389,6 @@ BVGText *BVGParseText(char *argv[5]) {
   size_t argN = 5;
   char *args[argN];
   char *knownArgs[5] = {"text", "x", "y", "size", "color"};
-  char *text = args[0];
   int x, y, size;
   Color *clr;
   
@@ -402,8 +401,8 @@ BVGText *BVGParseText(char *argv[5]) {
   args[4] = args[4]+2;
   args[4][strlen(args[4])-1] = '\0';
   clr = parseColorFromHex(args[4]);
-  
-  result->text=text; result->fontSize=size;
+
+  result->text=args[0]; result->fontSize=size*scale;
   result->x=x*scale; result->y=y*scale; 
   result->color=*clr;
 

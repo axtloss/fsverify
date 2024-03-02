@@ -9,17 +9,24 @@ Mit dem wechsel zu multithreading ging dies dann runter zu 19 Sekunden mit 12 Th
 \\
 Die Laufzeit von verifysetup verbesserte sich um 33846\% in einer Woche.
 \begin{verbatim}
-10.02.2024: fsverify setup takes 110minutes to complete for 1gb
+10.02.2024:
+fsverify setup takes 110minutes to complete for 1gb
 optimizations: none
-
-12.02.2024: fsverify setup takes 71minutes to complete for 1gb
+\end{verbatim}
+\begin{verbatim}
+12.02.2024:
+fsverify setup takes 71minutes to complete for 1gb
 optimizations: block size 2k, sha1 instead of sha256
-
-12.02.2024: fsverify setup takes ~9.54 seconds to complete for 1gb with 12 threads
+\end{verbatim}
+\begin{verbatim}
+12.02.2024:
+fsverify setup takes ~9.54 seconds to complete for 1gb with 12 threads
 optimizations: block size 2k, sha1 instead of sha256,
                multithreaded, db batch operations
-
-17.02.2024: fsverify setup takes ~19.50 seconds to complete for 1gb with 12 threads
+\end{verbatim}
+\begin{verbatim}
+17.02.2024:
+fsverify setup takes ~19.50 seconds to complete for 1gb with 12 threads
 optimizations: block size 2k, sha1 instead of sha256,
                multithreaded, db batch operations
 unoptimizations: enable database signing, header generation,

@@ -1,17 +1,18 @@
 \documentclass[12pt,a4paper]{article}
+
 \usepackage[utf8]{inputenc}
 \usepackage[T1]{fontenc}
-\usepackage{amsmath}
-\usepackage{amssymb}
 \usepackage{graphicx}
-\usepackage{hyperref}
-\usepackage{csquotes}
 \usepackage[left=2.50cm, right=2.50cm, top=2.50cm, bottom=2.50cm]{geometry}
 \usepackage[german]{babel}
-\usepackage{svg}
 \usepackage{setspace}
 \usepackage{tocbibind}
 \usepackage{minted}
+\usepackage{enumitem}
+\usepackage{microtype}
+\usepackage{aliascnt,ccaption}
+\usepackage[plainpages=false]{hyperref}
+\setlist[description]{style=nextline}
 
 \hypersetup{
 	colorlinks   = true,    % Colours links instead of ugly boxes
@@ -19,6 +20,16 @@
 	linkcolor    = cyan,    % Colour of internal links
 	citecolor    = black      % Colour of citations
 }
+
+\newaliascnt{figurealt}{figure}% New alias counter for figure float
+\aliascntresetthe{figurealt}
+\makeatletter
+\renewcommand{\contcaption}{%
+  \expandafter\addtocounter\expandafter{\@captype alt}{\m@ne}% Step alias cntr back
+  \expandafter\refstepcounter\expandafter{\@captype alt}% Make reference
+  \@contcaption\@captype}
+\makeatother
+
 \title{fsverify}
 \author{-}
 \setstretch{1.5}

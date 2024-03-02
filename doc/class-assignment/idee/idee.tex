@@ -1,6 +1,6 @@
 Die Idee einer Dateisystem verifizierung ist nichts neues, oft wird sie in embedded geräten oder handys implementiert, wo die sicherheit und integrität des systems von großer bedeutung ist.
-Jedoch ist sie bei Desktop betriebssystemen wie Windows, MacOS oder Linux Distributionen nicht sehr herkömmlich. Dies liegt meißt daran, dass eine effektive verifizierung des Dateisystems sich darauf verlässt, dass das Dateisystem sich nicht über zeit verändert, welches man bei Desktop-Betriebssystemen nicht gewährleisten kann, da Programme oft direkt in den Root des Betriebssystems schreiben (/usr in *nix, C:\\Program Files in windows).
-
+Jedoch ist sie bei Desktop betriebssystemen wie Windows, MacOS oder Linux Distributionen nicht sehr herkömmlich. Dies liegt meißt daran, dass eine effektive verifizierung des Dateisystems sich darauf verlässt, dass das Dateisystem sich nicht über zeit verändert, welches man bei Desktop-Betriebssystemen nicht gewährleisten kann, da Programme oft direkt in den Root des Betriebssystems schreiben (/usr in *nix, C:/Program Files in windows).
+\\
 Mittlerweile gibt es jedoch in der Linux-welt eine neue art von Distribution, die sogenannten 'Immutable' Distributionen, welche sich darin unterscheiden, dass der Root schreibgeschützt ist, oder wie bei NixOS oder Gnu GUIX garnicht erst richtig existiert. Dadurch können Programme nur direkt in den Homeordner des Nutzers installiert werden, und das eigentliche System bleibt original bestanden.
 
 Hierdurch wird Dateisystem-verifizierung möglich, da der originale zustand sich nie ändern wird, kann ein Programm ohne probleme verizieren, dass sich nichts verändert hat.
@@ -8,6 +8,7 @@ Hierdurch wird Dateisystem-verifizierung möglich, da der originale zustand sich
 \input{idee/implementierungen}
 \input{idee/hashquellen}
 \input{idee/gewaehlte_implementation}
+
 %%% Local Variables:
 %%% mode: LaTeX
 %%% TeX-master: "../fsverify"
