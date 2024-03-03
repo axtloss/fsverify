@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="https://github.com/axtloss/fsverify/blob/main/logo.png" />
+</p>
+
 # FsVerify
 
 Block based Filesystem verification.

@@ -1,0 +1,16 @@
+Insgesamt gibt es keine großen mängel, die mir während der Implementierung aufgefallen sind, die meisten Kritikpunkte liegen in fbwarn, welche teilweise der kurzen Entwicklungszeit (~7 Tage) zu schulden sind. 
+
+\subsection{Bessere Datenbank}
+Die Datenbank welche ich zurzeit nutze, bbolt, hat mehrere Probleme, zum einen ist die Lese und Schreibgeschwindigkeit nicht sehr schnell, trotz bestmöglicher Optimierungen durch nutzen von Batch-operations und einmaligen öffnen und Schreiben der Datenbank, fügt die Datenbank ungefähr 2 Sekunden an Laufzeit zu verifysetup, 22\% der ganzen Laufzeit.\\
+Dazu kommt auch, das bbolt es zurzeit nicht unterstützt, eine Datenbank direkt aus einer Variable zu lesen, die Datenbank muss als Pfad im Dateisystem angegeben werden, welches dazu führt, das fsverify die Datenbank von der Partition in eine Variable liest, und die Variable direkt wieder in einer Datei in \texttt{/tmp} schreibt. Dies führt zu unnötigen Write-cycles die durch das Verwenden einer anderen Datenbank oder einem Patch für den bbolt Quellcode gelöst werden könnte.
+
+\subsection{Nutzung vom TPM2 für öffentliche Schlüssel}
+Dieses Feature war geplant, und ich hatte bereits einen Schlüssel durch verschiedene Linux Tools in den TPM geschrieben, jedoch konnte ich keine gute go Bibliothek für TPMs finden, weshalb ich das Feature auslassen musste, hätte ich dies noch bevore ich mit der Implementierung gewusst, hätte ich entweder eine andere Programmiersprache für fsverify gewählt, oder eine eigene Bibliothek für TPMs als teil des Projekts entwickelt.
+
+\subsection{Besserer Parser für fbwarn}
+Zur zeit benutzt fbwarn einfaches string matching mit Funktionen aus \texttt{stdlib.h} und \texttt{strings.h}, dies Funktioniert, jedoch bringt es viele Probleme mit sich, sodass zum Beispiel ein Leerzeichen am falschen Platz bereits vieles Zerstören kann, welches sehr schwer zu debuggen ist, da man Fehler solcher art nicht sofort erkennt.\\
+Hätte ich mir für fbwarn mehr Zeit gegeben, hätte ich Programme benutzt, die Speziell für das Parsen von Dateien in C gedacht sind, wie \texttt{yacc(1)} und \texttt{lex(1)}.
+
+\subsection{Mehr Funktionen in bvg}
+bvg unterstützt zurzeit neun Funktionen, wie bereits gezeigt ist dies zwar genug um recht viel zu Zeichnen, jedoch unterstützen die Funktionen alle nur solide Farben, also keine Farbübergänge oder ähnliches, welches das Design der Bilder einschränkt und rehc ``alt'' erscheinen lässt, da Farbübergänge für elemente wie Schatten in modernen Designs sehr oft genutzt werden.\\
+Zudem unterstützt bvg keinen Bézier Kurven, die das Zeichnen von beinahe jeder Form erlauben. Das fehlen ist jedoch ein Zeitproblem, da raylib bereits Funktionen für Bézier Kurven hat und die Implementierung in bvg recht simple wäre.

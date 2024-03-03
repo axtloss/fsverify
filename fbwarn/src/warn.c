@@ -104,10 +104,12 @@ int main(int argc, char **argv) {
       free(funcs[i]);
     }
 
+    /* uncomment for FPS display
     char *text = malloc(strlen("100")*100);
     sprintf(text, "%d", GetFPS());
     DrawText(text, 2, 2, 20, MAROON);
     free(text);
+    */
     EndDrawing ();
     free(funcs);
   }

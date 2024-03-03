@@ -213,8 +213,8 @@ BVGRectangle *BVGParseRectangle(char *argv[7]) {
 */
 BVGRoundedRectangle *BVGParseRoundedRectangle(char *argv[9]) {
   BVGRoundedRectangle *result = malloc(sizeof(BVGRoundedRectangle));
-  BVGRectangle *bvgrectangle = malloc(sizeof(BVGRectangle));
-  Rectangle *rectangle = malloc(sizeof(Rectangle));
+  BVGRectangle *bvgrectangle;
+  Rectangle *rectangle;
   size_t argN = 9;
   char *args[argN];
   char *knownArgs[9] = {"x", "y", "width", "height", "color", "fill", "thickness", "roundness", "segments"};
@@ -227,10 +227,10 @@ BVGRoundedRectangle *BVGParseRoundedRectangle(char *argv[9]) {
   sscanf(args[7], "%fd", &roundness);
   sscanf(args[8], "%d", &segments);
 
-  printf("Roundness: %fd, Segments: %d\n", roundness, segments);
   result->roundness = roundness;
   result->segments = segments;
   
+  free(bvgrectangle);
   return result;
 }
 
@@ -313,6 +313,7 @@ BVGRing *BVGParseRing(char *argv[8]) {
   args[7][strlen(args[7])-1] = '\0';
   clr = parseColorFromHex(args[7]);
   
+
   result->centerX=x*scale; result->centerY=y*scale;
   result->inRadius=innerRadius; result->outRadius=outerRadius;
   result->startAngle=startAngle; result->endAngle=endAngle;
