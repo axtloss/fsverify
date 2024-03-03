@@ -1,9 +1,9 @@
-Die Idee einer Dateisystem verifizierung ist nichts neues, oft wird sie in embedded geräten oder handys implementiert, wo die sicherheit und integrität des systems von großer bedeutung ist.
-Jedoch ist sie bei Desktop betriebssystemen wie Windows, MacOS oder Linux Distributionen nicht sehr herkömmlich. Dies liegt meißt daran, dass eine effektive verifizierung des Dateisystems sich darauf verlässt, dass das Dateisystem sich nicht über zeit verändert, welches man bei Desktop-Betriebssystemen nicht gewährleisten kann, da Programme oft direkt in den Root des Betriebssystems schreiben (/usr in *nix, C:/Program Files in windows).
+Die Idee einer Dateisystemverifizierung ist nichts Neues; oft wird sie in embedded Geräten oder Handys implementiert, wo die Sicherheit und Integrität des Systems von großer Bedeutung sind.
+Jedoch ist sie bei Desktop-Betriebssystemen wie Windows, macOS oder Linux Distributionen nicht sehr herkömmlich. Dies liegt meist daran, dass eine effektive Verifizierung des Dateisystems sich darauf verlässt, dass das Dateisystem sich nicht über Zeit verändert, welches man bei Desktop-Betriebssystemen nicht gewährleisten kann, da Programme oft direkt in den Root des Betriebssystems schreiben (/usr in *nix, C:/Program Files in Windows).
 \\
-Mittlerweile gibt es jedoch in der Linux-welt eine neue art von Distribution, die sogenannten 'Immutable' Distributionen, welche sich darin unterscheiden, dass der Root schreibgeschützt ist, oder wie bei NixOS oder Gnu GUIX garnicht erst richtig existiert. Dadurch können Programme nur direkt in den Homeordner des Nutzers installiert werden, und das eigentliche System bleibt original bestanden.
+Mittlerweile gibt es jedoch in der Linux-Welt eine neue Art von Distribution, die sogenannten 'Immutable' Distributionen, welche sich darin unterscheiden, dass der Root schreibgeschützt ist oder wie bei NixOS oder Gnu GUIX gar nicht erst richtig existiert. Dadurch können Programme nur direkt in den Homeordner des Nutzers installiert werden, und das eigentliche System bleibt original bestanden.
 
-Hierdurch wird Dateisystem-verifizierung möglich, da der originale zustand sich nie ändern wird, kann ein Programm ohne probleme verizieren, dass sich nichts verändert hat.
+Hierdurch wird Dateisystem-Verifizierung möglich, da der originale Zustand sich nie ändern wird, kann ein Programm ohne Probleme die Partition verifizieren, dass sich nichts verändert hat.
 
 \input{idee/implementierungen}
 \input{idee/hashquellen}

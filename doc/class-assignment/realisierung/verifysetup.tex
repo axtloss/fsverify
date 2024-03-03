@@ -1,11 +1,11 @@
 \subsection{verifysetup}
-Nachdem fsverify vollständig implementiert war und alle Speicherkonzepte vollständig Entwickelt sind, braucht fsverify auch ein Programm um alles richtig aufzusetzen.\\
-Das Programm muss eine Datenbank von Nodes anhand der zu verifizierenden Partition erstellen, den Header entsprechend Konfigurieren und alles auf eine Datei schreiben, die der Nutzer (oder eher Distribution Entwickler) auf die für fsverify vorgesehene Partition schreiben kann.
+Nachdem fsverify vollständig implementiert war und alle Speicherkonzepte vollständig entwickelt sind, braucht fsverify auch ein Programm, um alles richtig aufzusetzen.\\
+Das Programm muss eine Datenbank von Nodes anhand der zu verifizierenden Partition erstellen, den Header entsprechend konfigurieren und alles auf eine Datei schreiben, die der Nutzer (oder eher Distributions-Entwickler) auf die für fsverify vorgesehene Partition schreiben kann.
 
 \subsubsection{Optimierung}
-Genauso wie fsverify, benutzt verifysetup erstmal nur einen Thread um die Datenbank zu erstellen. Dies führte zu einer laufzeit von über 2 Stunden für 1gb.\\
-Die schritte zur optimierung sind die gleichen wie bei fsverify. Jedoch verbesserte sich die Laufzeit um einiges bereits bei dem wechsel zu 2kb Blocks und sha1 hashing, von 2 Stunden zu einer Stunde.\\
-Mit dem wechsel zu multithreading ging dies dann runter zu 19 Sekunden mit 12 Threads.
+Genauso wie fsverify benutzt verifysetup erstmal nur einen Thread, um die Datenbank zu erstellen. Dies führte zu einer Laufzeit von über 2 Stunden für 1 GB.\\
+Die Schritte zur Optimierung sind die gleichen wie bei fsverify. Jedoch verbesserte sich die Laufzeit um einiges, bereits bei dem Wechsel zu 2 KB Blocks und sha1 hashing, von 2 Stunden zu einer Stunde.\\
+Mit dem Wechsel zu Multithreading ging dies dann runter zu 19 Sekunden mit 12 Threads.
 \\
 Die Laufzeit von verifysetup verbesserte sich um 33846\% in einer Woche.
 \begin{verbatim}

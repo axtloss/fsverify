@@ -1,10 +1,10 @@
 \subsection{fsverify}
-Da das Konzept der Festplattenverifizierung nichts neues ist, habe ich mir erstmals bereits existierende Projekte angeschaut, um zu sehen, wie es in anderen Betriebssystemen realisiert ist.
-Hierbei war google's dm-verity, welches in Android und ChromeOS geräten genutzt wird, die beste Hilfe, da es am besten dokumentiert und ausgetestet ist.
+Da das Konzept der Festplattenverifizierung nichts Neues ist, habe ich mir erstmals bereits existierende Projekte angeschaut, um zu sehen, wie es in anderen Betriebssystemen realisiert ist.
+Hierbei war Google's dm-verity, welches in Android und ChromeOS Geräten genutzt wird, die beste Hilfe, da es am besten dokumentiert und ausgetestet ist.
 
 \subsubsection{Partitionslayout}
-Inspiriert an dm-verity, entschied ich mich dafür, die Datenbank auf eine eigene Partition zu speichern, also war das erste Ziel ein gutes Partitionslayout zu Entwickeln, in der die Datenbank und Metadata so gut wie möglich gespiechert werden kann.\\
-Die erste Version des Layouts war recht simpel, es hatte alles was wirklich wichtig war, eine magic number, die signatur, größe des Dateisystems und größe der Datenbank:
+Inspiriert an dm-verity, entschied ich mich dafür, die Datenbank auf eine eigene Partition zu speichern; also war das erste Ziel, ein gutes Partitionslayout zu entwickeln, in der die Datenbank und Metadaten so gut wie möglich gespeichert werden können.\\
+Die erste Version des Layouts war recht simpel, es hatte alles, was wirklich wichtig war, eine magic number, die Signatur, Größe des Dateisystems und Größe der Datenbank:
 \begin{verbatim}
 <magic number> <signature> <filesystem size> <table size>
 \end{verbatim}
@@ -24,8 +24,8 @@ Die erste Version des Layouts war recht simpel, es hatte alles was wirklich wich
     \hline
   \end{tabular}
 \end{center}
-In der implementierung dieses Layouts fiel dann auf, dass es keinen Sinn macht, die Datenbankgröße in MB festzulegen
-Die zweite Version fügt aus diesem Grund ein weiteres Feld hinzu um die Einheit der Datenbankgröße festzulegen:
+In der Implementierung dieses Layouts fiel dann auf, dass es keinen Sinn macht, die Datenbankgröße in MB festzulegen.
+Die zweite Version fügt aus diesem Grund ein weiteres Feld hinzu, um die Einheit der Datenbankgröße festzulegen:
 \begin{verbatim}
 <magic number> <signature> <filesystem size> <table size> <table unit>
 \end{verbatim}
@@ -48,7 +48,7 @@ Die zweite Version fügt aus diesem Grund ein weiteres Feld hinzu um die Einheit
   \end{tabular}
 \end{center}
 \hfill \break
-Die nächste version teilte die Signatur in zwei teile auf. Da minisign signaturen aus einem kommentar, einer vertrauten signatur, einem weiteren kommentar und einer nicht vertrauten signatur
+Die nächste Version teilte die Signatur in zwei Teile auf. Da minisign Signaturen aus einem Kommentar, einer vertrauten Signatur, einem weiteren Kommentar und einer nicht vertrauten Signatur.
 \begin{verbatim}
 <magic number> <untrusted signature hash> <trusted signature hash>
 <filesystem size> <table size> <table unit>
@@ -76,9 +76,9 @@ Die nächste version teilte die Signatur in zwei teile auf. Da minisign signatur
 
 \subsubsection{Datenbanklayout}
 Nachdem der Header der Partition festgelegt wurde, muss festgelegt werden, wie die Datenbank festgelegt ist.
-bbolt, die Datenbankbibliothek die fsverify nutzt, hat ein key/value system, das heißt, dass jeder Wert mit einem Schlüssel verbunden ist. Zudem benutzt bbolt das konzept von ``Buckets'', einem Eimer in dem Datenpaare sortiert werden können.
+bbolt, die Datenbankbibliothek, die fsverify nutzt, hat ein key/value System, das heißt, dass jeder Wert mit einem Schlüssel verbunden ist. Zudem benutzt bbolt das Konzept von ``Buckets'', einem Eimer, in dem Datenpaare sortiert werden können.
 \bigbreak \noindent
-Das erste Layout war für eine implementation von fsverify die nur auf einem Thread läuft, besteht aus einem Bucket ``Nodes'', in dem jede Node gespeichert wird.
+Das erste Layout war für eine Implementation von fsverify, die nur auf einem Thread läuft, besteht aus einem Bucket ``Nodes'', in dem jede Node gespeichert wird.
 Eine Node sieht wie folgt aus:
 
 \begin{minted}{go}
@@ -106,8 +106,8 @@ type Node struct {
     \hline
   \end{tabular}
 \end{center}
-Jeder Block bekommt eine Node zugewiesen, diese Nodes werden in der Datenbank aneinandergereiht, mit dem wert von PrevBlockSum als den key.
-Der Wert PrevBlockSum erlaubt es, während der Verifizierung Fehler in der Datenbank zu finden. Wird eine Node verändert, stimmt der PrevBlockSum der nächsten Node nicht mehr, dass heißt, dass es nicht mehr möglich ist, den Key zu der nächsten Node zu berechnen, wodurch die Verifizierung fehlschlägt.
+Jeder Block bekommt eine Node zugewiesen; diese Nodes werden in der Datenbank aneinandergereiht, mit dem Wert von PrevBlockSum als den Key.
+Der Wert PrevBlockSum erlaubt es, während der Verifizierung Fehler in der Datenbank zu finden. Wird eine Node verändert, stimmt der PrevBlockSum der nächsten Node nicht mehr, das heißt, dass es nicht mehr möglich ist, den Key zu der nächsten Node zu berechnen, wodurch die Verifizierung fehlschlägt.
 \pagebreak
 \begin{verbatim}
 +-----+     +------+     +------+        +------+
@@ -117,7 +117,7 @@ Der Wert PrevBlockSum erlaubt es, während der Verifizierung Fehler in der Daten
 |     |     |adBfa |     |1Ab3d |        |bAd31 |
 +-----+     +------+     +------+        +------+
 \end{verbatim}
-Wird hier eine Node verändert, stimmt die restliche Kette nicht mehr
+Wird hier eine Node verändert, stimmt die restliche Kette nicht mehr.
 \begin{verbatim}
                          Hash passt nicht mehr
                                     |
@@ -130,21 +130,21 @@ Wird hier eine Node verändert, stimmt die restliche Kette nicht mehr
                        |
                  Veränderter Wert
 \end{verbatim}
-Da die erste Node keinen vorränger hat, von dem es PrevNodeSum berechnen kann, wird ihr der wert ``Entrypoint'' gegeben.
+Da die erste Node keinen Vorgänger hat, von dem es PrevNodeSum berechnen kann, wird ihr der Wert ``Entrypoint'' gegeben.
 \bigbreak \noindent
-Diese Datenbankstruktur hat ohne Probleme funktioniert, jedoch war fsverify viel zu langsam wenn es auf einem Thread läuft. Das Problem bei dem Multithreading jedoch ist, dass man Nodes nicht wahrlos aufgreifen kann, sondern eine vorherige Node oder die entrypoint Node braucht. Die Lösung ist recht einfach, die anzahl der Threads wird in verifysetup bereits angegeben und somit in fsverify fest einprogrammiert. Somit gibt es in der Datenbank mehrere entrypoint Nodes, die sich durch eine hinzugefügte Nummer unterscheiden. Dadurch ist es weiterhin möglich die Datenbank zu verifizieren, während es multithreaded läuft.
+Diese Datenbankstruktur hat ohne Probleme funktioniert, jedoch war fsverify viel zu langsam, wenn es auf einem Thread läuft. Das Problem bei dem Multithreading jedoch ist, dass man Nodes nicht wahrlos aufgreifen kann, sondern eine vorherige Node oder die entrypoint Node braucht. Die Lösung ist recht einfach, die Anzahl der Threads wird in verifysetup bereits angegeben und somit in fsverify fest einprogrammiert. Somit gibt es in der Datenbank mehrere entrypoint Nodes, die sich durch eine hinzugefügte Nummer unterscheiden. Dadurch ist es weiterhin möglich, die Datenbank zu verifizieren, während es multithreaded läuft.
 
 \subsubsection{Datenbanksignatur}
-Um sicherzustellen, dass die Datenbank nicht modifiziert wurde, wird eine Signatur generiert die mit der gelesenen Datenbank verglichen wird.\\
-Wie bereits erwähnt, wird für die Signatur das Programm minisign benutzt. Minisign beruht auf ein public/private key system, wodurch eine Signatur von dem privaten Schlüssel generiert wird und durch den öffentlichen Schluss verifiziert werden kann.\\
-Die Signatur wurde bereits im Partitionsheader gespeichert, was übrig bleibt ist der öffentliche Schlüssel.\\
-Da der öffentliche Schlüssel und die Signatur gebraucht werden, um eine Datenbank zu verifizieren, muss sichergestellt werden, dass beide seperat gespeichert werden und zumindest der öffentliche Schlüssel nicht bearbeitet werden kann.\\
-Die erste Idee um dies zu lösen wäre, dass man einfach den Schlüssel in eine Datei schreibt, und die Datei schreibgeschutzt Speichert. Jedoch ist bei diesem weg der speicherort der Datei das problem, wie soll man sicher sein, dass nicht das ganze Dateisystem verändert wurde um einen neuen Schlüssel zu beinhalten?
+Um sicherzustellen, dass die Datenbank nicht modifiziert wurde, wird eine Signatur generiert, die mit der gelesenen Datenbank verglichen wird.\\
+Wie bereits erwähnt, wird für die Signatur das Programm minisign benutzt. Minisign beruht auf einem public/private key System, wodurch eine Signatur von dem privaten Schlüssel generiert wird und durch den öffentlichen Schluss verifiziert werden kann.\\
+Die Signatur wurde bereits im Partitionsheader gespeichert. Was übrig bleibt, ist der öffentliche Schlüssel.\\
+Da der öffentliche Schlüssel und die Signatur gebraucht werden, um eine Datenbank zu verifizieren, muss sichergestellt werden, dass beide separat gespeichert werden und zumindest der öffentliche Schlüssel nicht bearbeitet werden kann.\\
+Die erste Idee, um dies zu lösen, wäre, dass man einfach den Schlüssel in eine Datei schreibt und die Datei schreibgeschützt speichert. Jedoch ist bei diesem Weg der Speicherort der Datei das Problem. Wie soll man sicher sein, dass nicht das ganze Dateisystem verändert wurde, um einen neuen Schlüssel zu beinhalten?
 \bigbreak \noindent
-Das heißt, dass man ein Schreibgeschütztes, möglichst seperates und immer vertraubares Speichermedium braucht, auf der man den Schlüssel speichert.\\
-Die lösung: Microcontoller. Sie können über usb-serial (also /dev/ttyACM* in Linux) Daten übertragen, können durch das Modifizieren bestimmter Sektoren permanent schreibgeschützt werden, und sind sehr klein, also können sie von dem Nutzer mitgetragen werden oder in dem Gerät direkt verbaut sein.
+Das heißt, dass man ein schreibgeschütztes, möglichst separates und immer vertrautes Speichermedium braucht, auf dem man den Schlüssel speichert.\\
+Die Lösung: Mikrocontroller. Sie können über usb-serial (also /dev/ttyACM* in Linux) Daten übertragen, können durch das Modifizieren bestimmter Sektoren permanent schreibgeschützt werden und sind sehr klein, also können sie von dem Nutzer mitgetragen werden oder in dem Gerät direkt verbaut sein.
 \\
-Um dieses konzept zu testen, habe ich einen Arduino UNO genutzt, dieser ist zwar immer schreibbar, hat aber keine Technischen unterschiede die die Datenübertragung ändern würden.
+Um dieses Konzept zu testen, habe ich einen Arduino UNO genutzt. Dieser ist zwar immer schreibbar, hat aber keine technischen Unterschiede, die die Datenübertragung ändern würden.
 \\
 Der Code für den Arudino sieht wie folgt aus:
 \begin{verbatim}
@@ -156,16 +156,16 @@ void setup() {
 void loop() {}
 \end{verbatim}
 
-Es wird eine Serielle Konsole auf einer Baudrate von 9600 geöffnet, auf der einmalig der öffentliche Schlüssel ausgegeben wird. Es ist wichtig zu beachten, dass der Schlüssel mit Tabstops (\symbol{92} t) ausgegeben wird, diese benutzt fsverify um zu wissen, ob der volle Schlüssel aufgenommen wird, fehlt der Tabstop am anfang oder am Ende, ist es sehr wahrscheinlich, dass der Schlüssel auch nicht vollständig aufgenommen wurde.
+Es wird eine serielle Konsole auf einer Baudrate von 9600 geöffnet, auf der einmalig der öffentliche Schlüssel ausgegeben wird. Es ist wichtig zu beachten, dass der Schlüssel mit Tabstopp (\symbol{92} t) ausgegeben wird, diese benutzt fsverify um zu wissen, ob der volle Schlüssel aufgenommen wird, fehlt der Tabstopp am Anfang oder am Ende, ist es sehr wahrscheinlich, dass der Schlüssel auch nicht vollständig aufgenommen wurde.
 
 \subsubsection{Optimierung}
-Wie bereits gesagt, lief die erste version von fsverify auf einem Thread, dies führte zu einer laufzeit von über einer Stunde bei einer Partitionsgröße von 1gb. Da fsverify beim booten des systems ausgeführt werden soll, ist eine laufzeit von einer Stunde nicht akzeptabel.
+Wie bereits gesagt, lief die erste Version von fsverify auf einem Thread, dies führte zu einer Laufzeit von über einer Stunde bei einer Partitionsgröße von 1 GB. Da fsverify beim Booten des Systems ausgeführt werden soll, ist eine Laufzeit von einer Stunde nicht akzeptabel.
 \\
-Die ersten schritte der Optimierung war es, die größe der Blocks zu verringern und von sha256 zu sha1 zu wechseln. Da das lesen von daten viel schneller erfolgt als das hashen von daten, ist es besser mehr zu lesen und dadurch kleinere Datenmengen zu hashen, der wechsel von sha256 zu sha1 mag erstmal schlecht wirken, jedoch macht dies keine Probleme, da hier keine Passwörter oder ähnliches verschlüsselt werden, also sind bruteforce attacken hier kein risiko.\\
+Die ersten Schritte der Optimierung war es, die Größe der Blocks zu verringern und von sha256 zu sha1 zu wechseln. Da das Lesen von daten viel schneller erfolgt als das hashen von daten, ist es besser mehr zu lesen und dadurch kleinere Datenmengen zu hashen, der wechsel von sha256 zu sha1 mag erstmal schlecht wirken, jedoch macht dies keine Probleme, da hier keine Passwörter oder ähnliches verschlüsselt werden, also sind Bruteforceattacken hier kein Risiko.\\
 Mit diesen Optimierungen hat sich die Laufzeit etwas verbessert, von 60 Minuten zu ungefähr 50. Nicht viel besser.
 \\
-Der nächste schritt war es, fsverify mit multithreading zu implementieren, die dafür notwendigen änderungen in der Datenbank wurden bereits erklärt. In fsverify selber hat sich die art geändert, wie die Daten von der Partition gelesen werden. Anstatt alles auf einmal zu lesen und durchzugehen, wird die größe der Partition genommen, durch die anzahl der Threads geteilt, und somit für jeden Thread genau die anzahl an bytes gelesen, die für die Node-kette nötig ist. Dies stellt sicher, dass keine Kette sich überlappt und korruptionen von Nodes in ketten auffallen, da sie durch Korruptionen versuchen könnten, bytes zu lesen die sie garnicht lesen sollten.\\
-Durch das multithreading hat sich die Laufzeit von den singlethreaded 50 Minuten zu nur 6 Sekunden verringert.
+Der nächste Schritt war es, fsverify mit Multithreading zu implementieren; die dafür notwendigen Änderungen in der Datenbank wurden bereits erklärt. In fsverify selber hat sich die Art geändert, wie die Daten von der Partition gelesen werden. Anstatt alles auf einmal zu lesen und durchzugehen, wird die Größe der Partition genommen, durch die Anzahl der Threads geteilt, und somit für jeden Thread genau die Anzahl an Bytes gelesen, die für die Node-kette nötig ist. Dies stellt sicher, dass keine Kette sich überlappt und korrupte Nodes in Ketten auffallen, da sie durch Korruption versuchen könnten, Bytes zu lesen, die sie gar nicht lesen sollten.\\
+Durch das Multithreading hat sich die Laufzeit von den singlethreaded 50 Minuten zu nur 6 Sekunden verringert.
 \bigbreak \noindent
 Fsverify hatte eine Laufzeitoptimierung von 60000\% in einer Woche:
 \begin{verbatim}
