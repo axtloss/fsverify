@@ -86,11 +86,13 @@ func validateThread(blockStart int, blockEnd int, bundleSize int, diskBytes []by
 
 func ValidateCommand(_ *cobra.Command, args []string) error {
 	if len(args) != 1 {
+		core.WarnUser()
 		return fmt.Errorf("Usage: fsverify verify [disk]")
 	}
 
 	header, err := core.ReadHeader(config.FsVerifyPart)
 	if err != nil {
+		core.WarnUser()
 		return err
 	}
 
@@ -98,23 +100,29 @@ func ValidateCommand(_ *cobra.Command, args []string) error {
 	// this does not check if the partition has been tampered with
 	// it only checks if the specified partition is even an fsverify partition
 	if header.MagicNumber != 0xACAB {
+		core.WarnUser()
 		return fmt.Errorf("sanity bit does not match. Expected %d, got %d", 0xACAB, header.MagicNumber)
 	}
 
 	fmt.Println("Reading DB")
 	dbfile, err := core.ReadDB(config.FsVerifyPart)
 	if err != nil {
+		core.WarnUser()
 		return err
 	}
 	key, err := core.ReadKey()
 	if err != nil {
+		fmt.Println(err)
+		core.WarnUser()
 		return err
 	}
 	fmt.Println("Key: " + key)
 	verified, err := core.VerifySignature(key, header.Signature, dbfile)
 	if err != nil {
+		core.WarnUser()
 		return err
 	} else if !verified {
+		core.WarnUser()
 		return fmt.Errorf("Signature verification failed\n")
 	} else {
 		fmt.Println("Signature verification success!")
@@ -123,11 +131,13 @@ func ValidateCommand(_ *cobra.Command, args []string) error {
 	fmt.Println("----")
 	disk, err := os.Open(args[0])
 	if err != nil {
+		core.WarnUser()
 		return err
 	}
 	defer disk.Close()
 	diskInfo, err := disk.Stat()
 	if err != nil {
+		core.WarnUser()
 		return err
 	}
 	diskSize := diskInfo.Size()
@@ -135,6 +145,7 @@ func ValidateCommand(_ *cobra.Command, args []string) error {
 	// If the filesystem size has increased ever since the fsverify partition was created
 	// it would mean that fsverify is not able to verify the entire partition, making it useless
 	if header.FilesystemSize*header.FilesystemUnit != int(diskSize) {
+		core.WarnUser()
 		return fmt.Errorf("disk size does not match disk size specified in header. Expected %d, got %d", header.FilesystemSize*header.FilesystemUnit, diskSize)
 	}
 
@@ -142,6 +153,7 @@ func ValidateCommand(_ *cobra.Command, args []string) error {
 	diskBytes := make([]byte, diskSize)
 	_, err = disk.Read(diskBytes)
 	if err != nil {
+		core.WarnUser()
 		return err
 	}
 	reader := bytes.NewReader(diskBytes)

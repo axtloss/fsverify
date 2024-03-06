@@ -19,6 +19,6 @@ int main(void) {
   if (ioctl(fbfb, FBIOGET_VSCREENINFO, &vinfo) == -1)
     return 1;
 
-  printf("%d", vinfo.yres);
+  printf("%d", vinfo.xres);
   return 0;
 }

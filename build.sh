@@ -50,7 +50,8 @@ echo "Building raylib"
 git submodule init
 git submodule update
 cd raylib/src
-make PLATFORM=PLATFORM_DRM RAYLIB_LIBTYPE=SHARED
+#make PLATFORM=PLATFORM_DRM RAYLIB_LIBTYPE=SHARED
+make RAYLIB_LIBTYPE=SHARED
 cd ../..
 mkdir include
 cp raylib/src/libraylib.so fsverify_root/lib/libraylib.so
@@ -59,7 +60,8 @@ cp raylib/src/raylib.h include/raylib.h
 echo "Building fbwarn"
 cd fbwarn
 autoreconf --install
-./configure CFLAGS="-O2 -std=gnu99 -DEGL_NO_X11 -DLPATFORM_DRM -I../../include -L../../fsverify_root/lib"
+#./configure CFLAGS="-O2 -std=gnu99 -DEGL_NO_X11 -DLPATFORM_DRM -I../../include -L../../fsverify_root/lib"
+./configure CFLAGS="-O2 -std=gnu99 -I../../include -L../../fsverify_root/lib"
 make
 patchelf --replace-needed libraylib.so.500 /fsverify/lib/libraylib.so src/fbwarn
 cp src/fbwarn ../fsverify_root/bin/fbwarn

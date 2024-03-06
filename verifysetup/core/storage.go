@@ -15,8 +15,6 @@ import (
 func ReadBlock(start int, end int, device *bytes.Reader) ([]byte, error) {
 	if end-start < 0 {
 		return []byte{}, fmt.Errorf("tried creating byte slice with negative length. %d to %d total %d\n", start, end, end-start)
-	} else if end-start > 2000 {
-		return []byte{}, fmt.Errorf("tried creating byte slice with length over 2000. %d to %d total %d\n", start, end, end-start)
 	}
 	block := make([]byte, end-start)
 	_, err := device.Seek(int64(start), 0)

@@ -106,8 +106,6 @@ func ReadKey() (string, error) {
 func ReadBlock(node Node, part *bytes.Reader, totalReadBlocks int) ([]byte, int, error) {
 	if node.BlockEnd-node.BlockStart < 0 {
 		return []byte{}, -1, fmt.Errorf("tried creating byte slice with negative length. %d to %d total %d\n", node.BlockStart, node.BlockEnd, node.BlockEnd-node.BlockStart)
-	} else if node.BlockEnd-node.BlockStart > 2000 {
-		return []byte{}, -1, fmt.Errorf("tried creating byte slice with length over 2000. %d to %d total %d\n", node.BlockStart, node.BlockEnd, node.BlockEnd-node.BlockStart)
 	}
 	block := make([]byte, node.BlockEnd-node.BlockStart)
 	blockSize := node.BlockEnd - node.BlockStart

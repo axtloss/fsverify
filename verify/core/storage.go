@@ -232,9 +232,7 @@ func GetNode(checksum string, db *bolt.DB) (Node, error) {
 func CopyByteArea(start int, end int, reader *bytes.Reader) ([]byte, error) {
 	if end-start < 0 {
 		return []byte{}, fmt.Errorf("tried creating byte slice with negative length. %d to %d total %d\n", start, end, end-start)
-	} else if end-start > 2000 {
-		return []byte{}, fmt.Errorf("tried creating byte slice with length over 2000. %d to %d total %d\n", start, end, end-start)
-	}
+	} 
 	bytes := make([]byte, end-start)
 	n, err := reader.ReadAt(bytes, int64(start))
 	if err != nil {

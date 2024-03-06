@@ -282,7 +282,7 @@ BVGCircle *BVGParseCircleSegment(char *argv[7]) {
   clr = parseColorFromHex(args[3]);
 
   result->drawSector=true;
-  result->centerX=x; result->centerY=y*scale;
+  result->centerX=x*scale; result->centerY=y*scale;
   result->color=*clr;
   result->radius=radius*scale;
   result->segments=segments;
@@ -315,7 +315,7 @@ BVGRing *BVGParseRing(char *argv[8]) {
   
 
   result->centerX=x*scale; result->centerY=y*scale;
-  result->inRadius=innerRadius; result->outRadius=outerRadius;
+  result->inRadius=innerRadius*scale; result->outRadius=outerRadius*scale;
   result->startAngle=startAngle; result->endAngle=endAngle;
   result->segmets=segments;
   result->color=*clr;
@@ -343,7 +343,7 @@ BVGEllipse *BVGParseEllipse(char *argv[6]) {
   args[5][strlen(args[5])-1] = '\0';
   clr = parseColorFromHex(args[5]);
   
-  result->centerX=x; result->centerY=y;
+  result->centerX=x*scale; result->centerY=y*scale;
   result->horizontalRadius=horizontalRadius*scale;
   result->verticalRadius=verticalRadius*scale;
   result->fill=fill;
